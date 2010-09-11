@@ -2,7 +2,7 @@
 #define __PHYS_MM_HEADER
 
 typedef struct {
-	u_long *base;
+	u_long *base;		// for 64bit address, this should be u_long_long
 	u_long posistion;
 	u_long max_posistion;	// currently not used
 	u_long stack_end_address;	// set by the kernel once it's done pushing pages onto the stack

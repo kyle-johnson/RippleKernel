@@ -280,7 +280,6 @@ void *morecore(u_long n)
 	return (void *)(f_start << 12);
 }
 
-
 u_long getpagesize()
 {
 	return 4096;

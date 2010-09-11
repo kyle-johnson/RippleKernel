@@ -72,20 +72,7 @@ k_main() // like main
 //	outportb(0x70, 0x0A);
 //	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
 
-//	k_printf("Now attempting to find floppy drives...\n");
-//	inti_floppy();
-
 //	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
-
-//	if(calibrate_floppy(0) == 0)
-//	{
-//		k_printf("The first floppy drive has been calibrated!!!\n");
-//	}
-//	else
-//	{
-//		k_printf("The first floppy drive hasn't been calibrated :( \n");
-//	};
-
 
 //	is_mp_present();
 

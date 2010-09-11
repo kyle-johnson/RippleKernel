@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////
+//  A stack for tracking _physical_ memory. This stack
+//  requires 1MB of space to track 1GB of memory.
+///////////////////////////////////////////////////////////////
+
 #include <data_types.h>
 #include <mutex.h>
 #include <k_printf.h>
@@ -5,13 +10,14 @@
 
 void *setup_phys_mm_stack(basic_stack_struct *the_basic_stack)
 {
-	the_basic_stack->base = (u_long *) ((&the_basic_stack) + sizeof(basic_stack_struct));
-	the_basic_stack->posistion = 0;
+	the_basic_stack->base = (u_long *) ((&the_basic_stack) + sizeof(basic_stack_struct)); // calculate base
+	the_basic_stack->posistion = 0; // no addresses on the stack yet
 	the_basic_stack->mutex = 0;
 
 	return(the_basic_stack);
 };
 
+// pushes an address onto the stack
 void push_phys_mm(basic_stack_struct *the_stack, u_long data)
 {
 	// lock_mutex_block(the_stack->mutex);
@@ -21,7 +27,7 @@ void push_phys_mm(basic_stack_struct *the_stack, u_long data)
 	// unlock_mutex(the_stack->mutex);
 };
 
-// returns the address if succesful, or 0 if not
+// returns the starting address if succesful, or 0 if unsuccesful
 u_long pop_phys_mm(basic_stack_struct *the_stack)
 {
 	if(the_stack->posistion >= 1)

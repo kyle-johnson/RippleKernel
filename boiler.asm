@@ -16,19 +16,7 @@ IDT_START equ 0x600
 
 [GLOBAL start]
 start:
-; check to see if paging is enabled
-	mov eax, cr0
-	and eax, PAGE_BIT
-	cmp eax, PAGE_BIT
-	jne tea
-
-	; it is, print a 'D' on screen
-	mov word [0B8000h],9F44h
-	cli
-	hlt
-
 ; check if data segment linked, located, and loaded properly
-tea:
 	mov eax,[ds_magic]
 	cmp eax,DS_MAGIC
 	je ds_ok
