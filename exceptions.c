@@ -5,6 +5,12 @@
 
 // #define PAGE_FAULT_EXT_INFO
 
+char *exception_types[] = { "divide error", "debug exceptions", " ",
+"breakpoint", "overflow", "bounds check", "invalid opcode",
+"coprocessor not available", "double fault", "coprocessor segment overrun",
+"invalid TSS", "segment not present", "stack exception", "GPE",
+"page fault", " ", "coprocessor error" };
+
 void page_fault()
 {
 	u_long fault_address;
@@ -89,9 +95,14 @@ void page_fault()
 	outportb(0x20, 0x20);
 };
 
-void fault(u_char int_num) // this needs some work as really, tasks should be nuked. the only time to truely panic is if it's a ring 0 task
+void fault(u_long int_num, u_long gs, u_long fs, u_long ds, u_long es, u_long edi, u_long esi, u_long ebp, u_long esp, u_long ebx, u_long edx, u_long ecx, u_long eax, u_long error_code, u_long eip, u_long cs, u_long eflags, u_long orig_esp, u_long orig_ss) // this needs some work as really, tasks should be nuked. the only time to truely panic is if it's a ring 0 task
 {
-	panic("System fault...  You need to restart your computer.");
+	//panic("System fault...  You need to restart your computer.");
+	k_printf("\n\nException: %d(%s)... You need to restart your computer.\n\nRegs dump:\n", int_num, exception_types[int_num]);
+	k_printf("eax: 0x%x ecx: 0x%x ebx: 0x%x edx: 0x%x\n", eax,  ecx,  ebx,  edx);
+	k_printf("edi: 0x%x esi: 0x%x ebp: 0x%x esp: 0x%x\n", edi, esi, ebp, esp);
+	k_printf("gs: 0x%x fs: 0x%x ds: 0x%x es: 0x%x\n", gs, fs, ds, es);
+	k_printf("eip: 0x%x cs: 0x%x eflags: 0x%x task's esp: 0x%x task's ss: 0x%x", eip, cs, eflags, orig_esp, orig_ss);
 	asm("cli");
 	asm("hlt");	
 };

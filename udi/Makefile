@@ -1,6 +1,6 @@
 # makefile for Ripple
 CC = gcc
-CFLAGS = -O2 -fno-builtins -Ic:\djgpp\myos\include -Ic:\djgpp\myos\udi\include -c
+CFLAGS = -O2 -fno-builtins -Ic:\djgpp\myos\include -Ic:\djgpp\myos\udi\include -Ic:\djgpp\myos\udi\common -c
 
 NASM = nasm
 NASMFLAGS = -f aout -i ..\include -i include

@@ -61,6 +61,8 @@ ds_ok:
 
 almost_done:
 
+	lldt[ldt_ptr]	; this is a NULL ldt
+
 	EXTERN bss, end		; zero the BSS
 	mov edi,bss
 	mov ecx,end
@@ -165,9 +167,13 @@ idt_ptr:
 	dw idt_end - idt - 1			; IDT limit
 	dd 0x600				; linear adr of IDT
 
+ldt_ptr:						; NULL
+	dw 0
+	dd 0
+
 [global _stack]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [SECTION .bss]
-	resb 1024
+	resb 2048
 	_stack:				;the _stack

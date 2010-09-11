@@ -6,16 +6,46 @@
 #include <processes.h>
 #include <scheduler.h>
 
-u_char scheduler_mutex=0;
+extern __total_num_threads;
 
-thread_struct My_Thread;
+u_char scheduler_mutex=0;
+u_char i=0;
+u_char first_time=1;
+
+thread_struct My_Threads[1];
 u_long new_esp;
+
+void make_threads()
+{
+	create_thread(&My_Threads[0], 0, (u_long)&task_1, 0x08, 0x10, 0x08);
+//	create_thread(&My_Threads[1], 0, (u_long)&task_2, 0x08, 0x10, 0x08);
+//	create_thread(&My_Threads[2], 0, (u_long)&task_1, 0x08, 0x10, 0x08);
+//	create_thread(&My_Threads[3], 0, (u_long)&task_2, 0x08, 0x10, 0x08);
+//	create_thread(&My_Threads[4], 0, (u_long)&task_1, 0x08, 0x10, 0x08);
+//	create_thread(&My_Threads[1], 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08);
+};
 
 void scheduler(u_long old_esp)
 {
 	lock_mutex_block(&scheduler_mutex);
-	k_printf("\nIRQ 0\n");
-	create_thread(&My_Thread, 0, (u_long)&task_1, 0x08, 0x10, 0x08);
-	new_esp = My_Thread.esp;
+
+	if(first_time == 0)
+	{
+		k_printf("\nold_esp: 0x%x\n", old_esp);
+		My_Threads[i].esp = old_esp;
+	};
+	first_time = 0;
+	i++;
+	
+	if(i<__total_num_threads)
+	{
+		new_esp = My_Threads[i].esp;
+	} else
+	{
+		i = 0;
+		new_esp = My_Threads[i].esp;
+	};
+	k_printf("new_esp: 0x%x\n", new_esp);
+
 	unlock_mutex(&scheduler_mutex);
 };

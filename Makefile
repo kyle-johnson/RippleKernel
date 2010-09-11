@@ -35,3 +35,6 @@ $(KERN_NAME) : $(KERN_OBJS) $(UDI_OBJS)
 
 clean:
 	del *.o
+
+map:
+	$(LD)  $(LDFLAGS) -Map os.map -o $(KERN_NAME) $(KERN_OBJS) $(UDI_OBJS)

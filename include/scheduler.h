@@ -8,6 +8,7 @@ typedef struct {
 } thread_info_block;
 
 void scheduler(u_long old_esp);
+void make_threads();
 
 extern irq0;
 

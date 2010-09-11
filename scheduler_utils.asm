@@ -13,7 +13,8 @@ _irq0:
 	push ds
 	pusha				; push GP registers
 
-	push esp				; this way the _scheduler routine can get the old esp
+	mov eax, esp			; this way the _scheduler routine can get the old esp
+	push eax
 
 	mov eax, _LINEAR_DATA_SEL	; setup segment registers
 	mov ds, eax

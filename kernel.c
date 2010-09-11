@@ -123,7 +123,7 @@ k_main() // like main
 	mm_t *mm_tmp = (mm_t *) 0x300000;
 
 	mm_tmp->superpage_bitmap[0] = 0x0000000F;	// first 4 superpages are allocated
-	for(i=4; i<1024; i++)	// set remaining 1,020 superpages to have 1,024 free pages each
+	for(i=4; i<1023; i++)	// set remaining 1,020 superpages to have 1,024 free pages each
 	{
 		mm_tmp->superpage_count[i] = 1024;
 	};
@@ -140,8 +140,12 @@ k_main() // like main
 	free(test);
 	k_printf("memory freed!\n");
 
-//	k_printf("\nSwitching tasks...\n");
-//	asm("sti");
+	k_printf("\nSetting up 3 tasks...\n");
+	make_threads();
+
+	k_printf("\nSwitching tasks...\n");
+	asm("sti");
+	unmask_irq(0);
 //	asm("int $0x40");
 /*
 	k_printf("switching to 320x240 with 256 colors...\n");

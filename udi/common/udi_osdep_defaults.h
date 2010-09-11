@@ -64,7 +64,7 @@
  */
 #ifndef _OSDEP_PRINTF
 #ifdef DEBUG
-#define _OSDEP_PRINTF	printf
+#define _OSDEP_PRINTF	k_printf
 #else
 #define	_OSDEP_PRINTF	(void)
 #endif
@@ -112,7 +112,7 @@
  * while holding any locks.
  */
 #ifndef _OSDEP_MUTEX_INIT
-#define _OSDEP_MUTEX_INIT(mutexp, lock_name)
+#define _OSDEP_MUTEX_INIT(mutexp, lock_name)	((*mutexp) = 0)
 #endif
 
 /*
@@ -122,7 +122,7 @@
  * called from interrupt level or while holding any locks.
  */
 #ifndef _OSDEP_MUTEX_DEINIT
-#define _OSDEP_MUTEX_DEINIT(mutexp)
+#define _OSDEP_MUTEX_DEINIT(mutexp)	((*mutexp) = 0)
 #endif
 
 /*
@@ -132,7 +132,7 @@
  * from being called at interrupt level, must disable interrupts.
  */
 #ifndef _OSDEP_MUTEX_LOCK
-#define _OSDEP_MUTEX_LOCK(mutexp)
+#define _OSDEP_MUTEX_LOCK(mutexp) lock_mutex_block(mutexp)
 #endif
 
 /*
@@ -142,7 +142,7 @@
  * If _OSDEP_MUTEX_LOCK() disabled interrupts, this must re-enable them.
  */
 #ifndef _OSDEP_MUTEX_UNLOCK
-#define _OSDEP_MUTEX_UNLOCK(mutexp)
+#define _OSDEP_MUTEX_UNLOCK(mutexp) unlock_mutex(mutexp)
 #endif
 
 /*
@@ -594,7 +594,7 @@ void _udi_get_limits_t(udi_limits_t *limits);
 #endif
 #ifndef _OSDEP_SUBTRACT_TIME
 # ifndef _OSDEP_CLK_TCK
-#  error  Need to define _OSDEP_CLK_TCK (number of ticks per second)
+#  define _OSDEP_CLK_TCK 1024 //error  Need to define _OSDEP_CLK_TCK (number of ticks per second)
 # endif
 #define NANOSECS_PER_TICK	(NSEC_PER_SEC / (_OSDEP_CLK_TCK))
 

@@ -11,5 +11,6 @@ typedef struct
 
 u_long virt_mem_inti();
 void *kmorecore(u_long n);
+void *morecore(u_long n);
 
 #endif

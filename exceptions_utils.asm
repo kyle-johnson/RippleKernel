@@ -5,16 +5,31 @@
 [extern _page_fault]
 [extern _LINEAR_DATA_SEL]
 
-[global _isr0]
-_isr0:
+%macro PUSH_REGS_SETUP_SEGS 1
+	pusha
+	push es
+	push ds
+	push fs
+	push gs
+
 	mov ax, _LINEAR_DATA_SEL
 	mov ds, eax
 	mov es, eax
+	mov eax, 0
 	mov fs, eax
 	mov gs, eax
-	mov eax, esp
-	mov ax, 0x0
-	push ax
+
+	;mov eax, esp
+	;push eax		; create pointer
+	mov eax, %1
+	push eax
+%endmacro
+
+[global _isr0]
+_isr0:
+	cli
+	PUSH_REGS_SETUP_SEGS 0x0
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -22,14 +37,9 @@ _isr0:
 
 [global _isr1]
 _isr1:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x1
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x1
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -37,14 +47,9 @@ _isr1:
 
 [global _isr2]
 _isr2:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x2
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x2
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -52,14 +57,9 @@ _isr2:
 
 [global _isr3]
 _isr3:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x3
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x3
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -67,14 +67,9 @@ _isr3:
 
 [global _isr4]
 _isr4:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x4
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x4
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -82,14 +77,9 @@ _isr4:
 
 [global _isr5]
 _isr5:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x5
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x5
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -97,14 +87,9 @@ _isr5:
 
 [global _isr6]
 _isr6:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x6
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x6
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -112,14 +97,9 @@ _isr6:
 
 [global _isr7]
 _isr7:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x7
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x7
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -127,14 +107,9 @@ _isr7:
 
 [global _isr8]
 _isr8:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x8
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x8
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -142,14 +117,9 @@ _isr8:
 
 [global _isr9]
 _isr9:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x9
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x9
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -157,14 +127,9 @@ _isr9:
 
 [global _isr10]
 _isr10:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0xa
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0xa
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -172,14 +137,9 @@ _isr10:
 
 [global _isr11]
 _isr11:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0xb
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0xb
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -187,14 +147,9 @@ _isr11:
 
 [global _isr12]
 _isr12:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0xc
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0xc
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -202,14 +157,9 @@ _isr12:
 
 [global _isr13]
 _isr13:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0xd
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0xd
+
 	mov eax, _fault
 	call eax
 	cli	; not..
@@ -243,14 +193,9 @@ _isr14: ; page fault... this one is IMPORTANT!
 
 [global _isr16]
 _isr16:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0x10
-	push ax
+	cli
+	PUSH_REGS_SETUP_SEGS 0x10
+
 	mov eax, _fault
 	call eax
 	cli	; not..
