@@ -24,23 +24,23 @@ unsigned int paging_init()
 	pagedir = mem_block;
 
 	// next, setup pagetab to start at the page table
-	pagetab = pagedir + 1024;
-	pagetab2 = pagedir + (2*1024);
+	pagetab = pagedir + (1024*4);
+	pagetab2 = pagedir + (2*(1024*4));
 
 	// point the 1st PDE to the 1st PT
-	pagetab_spot = (unsigned long)pagedir + (1*1024);
+	pagetab_spot = (unsigned long)pagedir + (1*(1024*4));
 	pagedir[0] = pagetab_spot | 3; // supervisor level, read/write, present(011 in binary)
 
 	// finish filling in PDEs for the first 1GB of address space
 	for(i=1;i<249;i++)
 	{
-		pagetab_spot = (unsigned long)pagedir + ((i+1)*1024);
+		pagetab_spot = (unsigned long)pagedir + ((i+1)*(1024*4));
 		pagedir[i] = pagetab_spot | 2; // supervisor level, read/write, not present(010 in binary)
 	};
 	// this is for the user address space
 	for(i=250;i<999;i++)
 	{
-		pagetab_spot = (unsigned long)pagedir + ((i+1)*1024);
+		pagetab_spot = (unsigned long)pagedir + ((i+1)*(1024*4));
 		pagedir[i] = pagetab_spot | 6; // user level, read/write, not present(110 in binary)
 	};
 

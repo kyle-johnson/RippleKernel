@@ -3,6 +3,7 @@
 #include <putchar.h>
 #include <data_types.h>
 #include <floppy.h>
+#include <real_time_clock.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -22,7 +23,9 @@ k_main() // like main
 {
 	unsigned int b=0;
 	unsigned int * a;
-	vector_t v, soft; // needed for keyboard ISR and int 30 ISR
+	vector_t v, soft, real_clock_vector; // needed for keyboard ISR and int 30 ISR
+	amount_of_ticks=0;
+	unsigned char temp;
 
 	k_clear_screen();
 	k_load();
@@ -83,9 +86,34 @@ k_main() // like main
 		k_printf("Got it!\n\n");
 		k_printf("Now trying to free the memory...\n");
 		real_mem_free(a);
-		k_printf("Memory is free!\n");
+		k_printf("Memory is free!\n\n");
 	};
 
+	k_printf("Setting up the real time clock handler..\n");
+	disable_ints(); // disable interrupts while changing an interrupt handler
+	real_clock_vector.eip = (unsigned)real_time_clock_ISR;
+	real_clock_vector.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
+	setvect(&real_clock_vector, 0x48);
+	unmask_irq(8);
+	enable_ints(); // renable interrupts
+	k_printf("Real time clock handler has been set up and IRQ 8 has been unmasked..\n\n");
+
+	outportb(0x70, 0x0A);
+	outportb(0x71, (inportb(0x71) | 0x0F)); // set the real time clock to generate 2 ints per second
+
+	k_printf("The real time clock will now be enabled for 6 seconds, then disabled...\n");
+	enable_rtc();
+	k_printf("test....\n");
+	while(amount_of_ticks < 12)
+	{
+		;
+	};
+	mask_irq(8);
+	disable_rtc();
+	k_printf("6 seconds have passed and the real time clock has been disabled.\n\n");
+
+	k_printf("Now attempting to find floppy drives...\n");
+	inti_floppy();
 
 	while(b!=5)		// the 'idle' loop
 	{;};
@@ -199,6 +227,10 @@ void fault(regs_t *regs)
 	if(regs->which_int==0x40)	// timer(IRQ 0)
 	{
 		outportb(0x20, 0x20);
+	}
+	else if(regs->which_int == 0x0E)
+	{
+		;
 	}
 	else
 	{
