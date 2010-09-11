@@ -2,18 +2,14 @@
 
 task_1()
 {
-	unsigned long num=0;
-	for(;; num++)
-	{
-		k_printf("Task 1: %d", num);
-	};
+	putc('a');
+	asm("int $0x31");
 };
 
 task_2()
 {
-	unsigned long num=0;
-	for(;; num++)
+	while(1)
 	{
-		k_printf("Task 2: %d", num);
+		putc('b');
 	};
 };

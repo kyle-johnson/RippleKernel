@@ -57,6 +57,9 @@ void k_printf(char *message, ...)
 				case 'o': // to display a number in octal
 					ntostr(*parm, 8, &total_message[_strlen(total_message)]);
 					break;
+				case 'b': // to display a number in octal
+					ntostr(*parm, 2, &total_message[_strlen(total_message)]);
+					break;
 			};
 			(unsigned long)parm += 4;
 			is_percent_sign = 0;

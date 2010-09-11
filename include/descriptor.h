@@ -1,6 +1,6 @@
 // this file is based on John Fine's gdtnasm.inc
-#ifndef DESCRIPTORS_HEADER
-#define DESCRIPTORS_HEADER
+#ifndef DESCRIPTOR_HEADER
+#define DESCRIPTOR_HEADER
 
 // each descriptor must have one of the next 8 codes to define
 // the type of descriptor
@@ -31,21 +31,18 @@
 #define D_BIG_LIM		0x80	// limit is in 4kb units
 
 #pragma pack (push, 1)
-struct {
-	unsigned int limit,
-	unsigned int base,
-	unsigned char base2,
-	unsigned char type,
-	unsigned char limit_and_flags,
+
+typedef struct {
+	unsigned short limit;
+	unsigned short base;
+	unsigned char base2;
+	unsigned char type;
+	unsigned char limit_and_flags;
 	unsigned char base3;
 } DESCRIPTOR;
 
-struct {
-	unsigned int limit,
-	unsigned long base;
-} GDTReg;
 #pragma pack (pop)
 
-void make_descriptor(DESCRIPTOR *the_descriptor, arg1 u_long, arg2 u_long, arg3 u_long);
+void make_descriptor(DESCRIPTOR *the_descriptor, u_long arg1, u_long arg2, u_long arg3);
 
 #endif

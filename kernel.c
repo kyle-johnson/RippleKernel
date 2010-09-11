@@ -26,7 +26,7 @@ k_main() // like main
 	unsigned int b=0;
 	unsigned int * a;
 	unsigned long temp2;
-	vector_t v, soft, real_clock_vector; // needed for keyboard ISR and int 30 ISR
+	vector_t v, soft, real_clock_vector, task_jumper; // needed for keyboard ISR and int 30 ISR
 	amount_of_ticks=0;
 	unsigned char temp;
 
@@ -50,6 +50,10 @@ k_main() // like main
 	v.eip = (unsigned)kbd_isr;
 	v.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
 	setvect(&v, 0x41);		// okay, DO IT!
+
+	task_jumper.eip = (unsigned)int_31;
+	task_jumper.access_byte = 0x8E;
+	setvect(&task_jumper, 0x31);
 
 	k_printf("Setting up IRQ 6(floppy...\n");
 	v.eip = (unsigned)irq6;
@@ -255,6 +259,7 @@ void mask_irq(int irq)
 
 void fault(regs_t *regs)
 {
+	k_printf("0x%x", regs->which_int);
 	if(regs->which_int==0x40)	// timer(IRQ 0)
 	{
 		outportb(0x20, 0x20);
@@ -266,6 +271,8 @@ void fault(regs_t *regs)
 	else
 	{
 		panic("System fault...  You need to restart your computer.");
+		asm("cli");
+		asm("hlt");
 		outportb(0x20, 0x20);
 	};
 };

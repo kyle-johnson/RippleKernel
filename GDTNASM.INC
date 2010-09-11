@@ -48,19 +48,19 @@ D_BIG_LIM	EQU	  80h	;Limit is in 4K units
 
 %macro desc 3
 w_a_n_p_b
-%if (%3) & (~(%3)>>2) & 0x400   ;Gate
-	dw	%1
-	dw	%2
-	dw	(%3)+D_PRESENT
-	dw	(%1) >> 16
-%else                           ;Not a gate
+;%if (%3) & (~(%3)>>2) & 0x400   ;Gate
+;	dw	%1
+;	dw	%2
+;;	dw	(%3)+D_PRESENT
+;	dw	(%1) >> 16
+;%else                           ;Not a gate
 	dw	%2
 	dw	%1
 	db	(%1) >> 16
 	db	((%3)+D_PRESENT) >> 8
 	db	(%3) + ((%2) >> 16)
 	db	(%1) >> 24
-%endif
+;%endif
 %endmacro
 
 ;-----------------------------------------------------------------------------

@@ -1,6 +1,8 @@
+%include "gdtnasm.inc"
 [bits 32]
 [extern _TSS_ENTRY_0]
 [extern _TSS_ENTRY_1]
+
 [global _write_ltr]
 _write_ltr:
 	push ebp
@@ -19,5 +21,3 @@ _load_first_ltr:
 [global _jmp_tss_1]
 _jmp_tss_1:
 	jmp _TSS_ENTRY_1 : 0
-
-[global _jmp_tss_2]

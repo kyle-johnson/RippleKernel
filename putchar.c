@@ -1,18 +1,22 @@
 // basic putc function
 // by K.J.		5.7.2002
 #include <k_defines.h>
-#include <putchar.h>
 #include <data_types.h>
 #include <string.h>
+#include <mutex.h>
+#include <putchar.h>
 
 // video memory pointer
 char *vidmem2 = (char *) 0xb8000;
 
 unsigned _csr_x=0, _csr_y=0;
+u_char putc_mutex=0;
 
 void putc(unsigned char c)
 {
 	unsigned int vid_mem_spot;
+
+	lock_mutex_block(&putc_mutex);
 
 	switch(c)
 	{
@@ -54,4 +58,6 @@ void putc(unsigned char c)
 	};
 
 	update_cursor(_csr_y, _csr_x);
+
+	unlock_mutex(&putc_mutex);
 };

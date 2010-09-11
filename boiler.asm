@@ -6,8 +6,9 @@
 %include "gdtnasm.inc"
 
 TSS_START equ 0x200000
-
 PAGE_BIT equ 0x80000000
+
+GDT_START equ 0x500
 
 [extern _task_1]
 [extern _task_2]
@@ -16,7 +17,7 @@ PAGE_BIT equ 0x80000000
 [BITS 32]
 
 [GLOBAL start]
-entry:
+start:
 ; check to see if paging is enabled
 	mov eax, cr0
 	and eax, PAGE_BIT
@@ -38,7 +39,15 @@ tea:
 	jmp short $
 
 ds_ok:
-; stop using bootloader GDT, and load new GDT
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; relocate the GDT to 0x500
+	mov esi, gdt
+	mov edi, GDT_START
+	mov ecx, (gdt_end-gdt)
+	cld
+	rep movsd
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 	lgdt [gdt_ptr]
 
 	mov ax,_LINEAR_DATA_SEL
@@ -100,7 +109,7 @@ mboot:
 	dd code
 	dd bss
 	dd end
-	dd entry
+	dd start
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; interrupt/exception handlers
@@ -347,13 +356,6 @@ gdt:			;our descriptors
 	db 0		; limit 19:16, flags
 	db 0		; base 31:24
 
-; unused descriptor
-	dw 0
-	dw 0
-	db 0
-	db 0
-	db 0
-	db 0
 [global _LINEAR_DATA_SEL]
 _LINEAR_DATA_SEL	equ	$-gdt
 	dw 0FFFFh
@@ -376,15 +378,12 @@ _TSS_ENTRY_0		equ	$-gdt
 [global _TSS_ENTRY_1]
 _TSS_ENTRY_1		equ	$-gdt
 	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
-[global _TSS_ENTRY_2]
-_TSS_ENTRY_2		equ	$-gdt
-	desc TSS_START+(TSS_SIZE*2), TSS_SIZE, D_TSS
 
 gdt_end:
 
 gdt_ptr:
 	dw gdt_end - gdt - 1
-	dd gdt
+	dd 0x500
 
 ; 256 ring 0 interrupt gates
 
@@ -403,6 +402,9 @@ idt_ptr:
 	dd idt				; linear adr of IDT
 
 [global _stack]
+
+[global _extra_tss]
+_extra_tss	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [SECTION .bss]

@@ -1,8 +1,12 @@
-#include <mm.h>
 #include <data_types.h>
+#include <mutex.h>
+#include <mm.h>
 
 // stucture for tracking REAL PHYSICAL memory
 struct real_mm_tracking r_m_t;
+
+// memory management mutex
+volatile u_char mm_mutex = 0;
 
 // paging startup/setup
 unsigned int paging_init()
@@ -13,6 +17,8 @@ unsigned int paging_init()
 			*pagedir;	// page directory address
 	unsigned long addr, pagetab_spot, pagedir_spot;
 	unsigned long i, s;
+
+	lock_mutex_block(&mm_mutex);
 
 	// zero the page directory
 	for(i=0; i<1024; i++)
@@ -91,6 +97,7 @@ unsigned int paging_init()
 	// we have all 4k pages in use for the bottom 4mb
 	r_m_t.superpage_count[0] = 0;
 
+	unlock_mutex(&mm_mutex);
 
 	return(1);
 };
@@ -115,6 +122,8 @@ void *real_mem_malloc()
 {
 	unsigned int i, a, b, c, d, e, f, g, h;
 	unsigned int PointerToPage, found=0;
+
+	lock_mutex_block(&mm_mutex);
 
 	// this is necessary because we have 32 4mb "spaces" for each variable in the superpage_bitmap array
 	if(r_m_t.superpage_top<=32)
@@ -228,6 +237,8 @@ void *real_mem_malloc()
 		};
 	};
 
+	unlock_mutex(&mm_mutex);
+
 	// return a pointer to the page
 	return (void *)(PointerToPage << 12);
 };
@@ -247,9 +258,13 @@ unsigned int real_mem_free(void *PointerToPage)
 {
 	unsigned int i = (unsigned int)PointerToPage >> 12;
 
+	lock_mutex_block(&mm_mutex);
+
 	r_m_t.page_bitmap[i >> 5] &= ~(1 << (i & 0x1F));
 	r_m_t.superpage_bitmap[(i >> 10) >> 5] &= ~(1 << (i & 0x1F));
 	r_m_t.superpage_count[i >> 10]++;
+
+	unlock_mutex(&mm_mutex);
 
 	return 0;
 };
