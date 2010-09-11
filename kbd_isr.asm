@@ -25,7 +25,6 @@ kbd_isr_finish:
 	mov al, 0x20
 	out 0x20, al
 	sti
-;	ret
 	pop eax
 	popa				; pop GP registers
 	pop ds				; pop segment registers

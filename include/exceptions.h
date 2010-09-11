@@ -19,7 +19,6 @@ extern isr11;
 extern isr12;
 extern isr13;
 extern isr14;
-extern isr15;
 extern isr16;
 
 #endif

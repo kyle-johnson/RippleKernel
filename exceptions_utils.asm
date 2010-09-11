@@ -240,21 +240,6 @@ _isr14: ; page fault... this one is IMPORTANT!
 	add esp, 8	; drop exception number and error code
 	iret
 
-[global _isr15]
-_isr15:
-	mov ax, _LINEAR_DATA_SEL
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-	mov gs, eax
-	mov eax, esp
-	mov ax, 0xf
-	push ax
-	mov eax, _fault
-	call eax
-	cli	; not..
-	hlt	; needed 'cause we never get here.. but, it can't hurt
-
 [global _isr16]
 _isr16:
 	mov ax, _LINEAR_DATA_SEL

@@ -63,7 +63,6 @@ k_main() // like main
 	modify_gate_address(&isr12, 12);
 	modify_gate_address(&isr13, 13);
 	modify_gate_address(&isr14, 14);
-	modify_gate_address(&isr15, 15);
 	modify_gate_address(&isr16, 16);
 	k_printf("Exception handlers setup.\n");
 

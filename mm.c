@@ -72,7 +72,7 @@ unsigned int paging_init()
 	****************************************/
 	pagedir_spot = (unsigned long)pagedir;
 	// okay, set up CR3 with the address of the PD
-	write_cr3((read_cr3() & 0xFFFL) | (pagedir_spot));
+	write_cr3(pagedir_spot);
 
 	r_m_t.superpage_top = 4; // 4 x 4 = 16mb
 	r_m_t.page_top = (r_m_t.superpage_top * 256);
