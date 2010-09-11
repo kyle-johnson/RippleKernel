@@ -68,14 +68,29 @@ unsigned int paging_init()
 	// okay, set up CR3 with the address of the PD
 	write_cr3((read_cr3() & 0xFFFL) | (pagedir_spot));
 
-	r_m_t.superpage_top = 4;
+	r_m_t.superpage_top = 4; // 4 x 4 = 16mb
 	r_m_t.page_top = (r_m_t.superpage_top * 256);
 
-	u_short mem_blah;
-	for(mem_blah=0; mem_blah<=31; mem_blah++)
+	// clear the bitmap for 4kb pages
+	u_short mem_var;
+	for(mem_var=1; mem_var<(r_m_t.page_top << 5); mem_var++)
 	{
-		r_m_t.page_bitmap[mem_blah] = 0xFFFFFFFF;
+		r_m_t.page_bitmap[mem_var-1] = 0x00000000;
 	};
+	// clear the superpage bitmap
+	r_m_t.superpage_bitmap[0] = 0x00000000;
+
+
+	// now we take memory(4mb) for the kernel, page tables, etc
+	r_m_t.superpage_bitmap[0] = 1; // bottom 4mb taken
+	// reserve all the 4k pages for that bottom 4mb
+	for(mem_var=0; mem_var<31; mem_var++)
+	{
+		r_m_t.page_bitmap[mem_var] = 0xFFFFFFFF;
+	};
+	// we have all 4k pages in use for the bottom 4mb
+	r_m_t.superpage_count[0] = 0;
+
 
 	return(1);
 };
@@ -86,64 +101,158 @@ void enable_paging()
 	write_cr0(read_cr0() | 0x80000000L);
 };
 
-//   This function deals only with PHYSICAL memory
-//  and physical memory only
+/***************************************************************
+*  This function deals only with PHYSICAL memory
+*  and physical memory only
+*
+*  This function can allocat NO LESS than 4kb of memory
+*  and NO MORE than 4kb of memory at a time
+*
+*  The overall design of this function comes from Frank
+*  Millea's Cottontail OS
+****************************************************************/
 void *real_mem_malloc()
 {
-	unsigned int i;
+	unsigned int i, a, b, c, d, e, f, g, h;
+	unsigned int PointerToPage, found=0;
 
-	for(i=0; i<(r_m_t.superpage_top-1); i++)
+	// this is necessary because we have 32 4mb "spaces" for each variable in the superpage_bitmap array
+	if(r_m_t.superpage_top<=32)
 	{
-		if(r_m_t.superpage_bitmap[i] != 0xFFFFFFFF) // there's some free mem here
+		if(r_m_t.superpage_bitmap[0] != 0xFFFFFFFF) // there's free mem somewhere here
 		{
-			
+			a = 0 << 5; // will all ways be 0 for this case
+			for(b=0; b<(r_m_t.superpage_top-1); b++)
+			{
+				if(r_m_t.superpage_count[a+b] >= 1) // hey! at least 1 free 4k page exists in here :)
+				{
+					c = (a+b) << 5;
+					for(d=0; d<32; d++)
+					{
+						e = r_m_t.page_bitmap[c+d];
+						if(e == 0xFFFFFFFF)
+						{
+							break; // no free pages in this group... go onto the next
+						}
+						else if(e == 0x00000000) // this group is all free
+						{
+							PointerToPage = (d + c) << 5; // save the address
+							found = 1;
+						}
+						else // some pages in this group are in use, some aren't
+						{
+							f = (c+d) << 5;
+							for(g=0; g<32; g++)
+							{
+								if(!(e & (1 << g))) // see if this page is free
+								{
+									PointerToPage = (f+g);
+									found = 1;
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+		if(found = 0) // no RAM was available
+		{
+			return (void *)-1;
+		};
+
+		// now we need to do some "book keeping"
+		// we can change any variable now except "PointerToPage"
+		i=PointerToPage;
+		r_m_t.page_bitmap[i >> 5] |= 1 << (i & 0x1F);
+		r_m_t.superpage_count[i >> 10]--;
+		if(r_m_t.superpage_count[i >> 10] == 0)
+		{
+			r_m_t.superpage_bitmap[(i >> 10) >> 5] |= 1 << ((i >> 10) & 0x1F);
 		};
 	};
+
+	if(r_m_t.superpage_top>32)
+	{
+		for(h=0; h<(r_m_t.superpage_top-1); h++)
+		{
+			if(r_m_t.superpage_bitmap[h] != 0xFFFFFFFF) // there's free mem somewhere here
+			{
+				a = h << 5; // will all ways be 0 for this case
+				for(b=0; b<(r_m_t.superpage_top-1); b++)
+				{
+					if(r_m_t.superpage_count[a+b] >= 1) // hey! at least 1 free 4k page exists in here :)
+					{
+						c = (a+b) << 5;
+						for(d=0; d<32; d++)
+						{
+							e = r_m_t.page_bitmap[c+d];
+							if(e == 0xFFFFFFFF)
+							{
+								break; // no free pages in this group... go onto the next
+							}
+							else if(e == 0x00000000) // this group is all free
+							{
+								PointerToPage = (d + c) << 5; // save the address
+								found = 1;
+							}
+							else // some pages in this group are in use, some aren't
+							{
+								f = (c+d) << 5;
+								for(g=0; g<32; g++)
+								{
+									if(!(e & (1 << g))) // see if this page is free
+									{
+										PointerToPage = (f+g);
+										found = 1;
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+			if(found = 0) // no RAM was available
+			{
+				return (void *)-1;
+			};
+			
+			// now we need to do some "book keeping"
+			// we can change any variable now except "PointerToPage"
+			i=PointerToPage;
+			r_m_t.page_bitmap[i >> 5] |= 1 << (i & 0x1F);
+			r_m_t.superpage_count[i >> 10]--;
+			if(r_m_t.superpage_count[i >> 10] == 0)
+			{
+				r_m_t.superpage_bitmap[(i >> 10) >> 5] |= 1 << ((i >> 10) & 0x1F);
+			};
+		};
+	};
+
+	// return a pointer to the page
+	return (void *)(PointerToPage << 12);
 };
 
-/************************************************
-    The overall design of the mm tracking
-  came from Frank  Millea's Cottontail OS
-  file "mem.c"
-    This function uses 2 bitmaps... a 4mb
-  "superpage" bitmap, and then one for
-  the actual 4k pages.
-************************************************/
-//void *k_malloc()
-//{
-//	unsigned int i, a, b, c, d, t;
-//
-//	for(i=0; i<32; i++)
-//	{
-//		if(mm_tracking.superpage_usage_bitmap[i] != 0xFFFFFFFF) // a superpage in this "group" has a free 4k page(s)
-//		{
-//			a=i<<5; // shift i by 5 and then store the value in a
-//			for(b=0; b<32; b++)
-//			{
-//				if(mm_tracking.superpage_count[a+b] >= i) // see if this superpage enough free 4k page(s)
-//				{
-//				c = (a+b) << 5;	// offset to start of 4k pages
-//					for(d=0; d<32; d++)	// go through all 1024 4k pages in groups of 32
-//				{
-//						t = mm_tracking.page_usage_bitmap[c+d];
-//						if(t == 0x00000000)	// all 32 4k pages are free
-//						{
-//							;
-//						}
-//						else if(t == 0xFFFFFFFF)	// all 32 4k pages are taken
-//						{
-//							;
-//						}
-//						else	// some of the 4k pages are used an some aren't
-//						{
-//							;
-//						};
-//					};
-//				};
-//			};
-//		};
-//	};
-//};
+/*************************************************
+*  This function simply edits the bitmaps for
+*  one 4kb page of memory that is reserved
+*  via real_mem_malloc()
+*
+*  Will return and error code if this fails, or
+*  a 0 if it succedes
+*
+* This function is based on the dealloc
+*  function from Frank Millea's Cottontail OS
+**************************************************/
+unsigned int real_mem_free(void *PointerToPage)
+{
+	unsigned int i = (unsigned int)PointerToPage >> 12;
+
+	r_m_t.page_bitmap[i >> 5] &= ~(1 << (i & 0x1F));
+	r_m_t.superpage_bitmap[(i >> 10) >> 5] &= ~(1 << (i & 0x1F));
+	r_m_t.superpage_count[i >> 10]++;
+
+	return 0;
+};
 
 // taken from Frank  Millea's Cottontail OS file, "mem.c"
 //u_long memprobe()

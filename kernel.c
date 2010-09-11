@@ -20,6 +20,7 @@ void disable_ints()
 k_main() // like main
 {
 	unsigned int b=0;
+	unsigned int * a;
 	vector_t v, soft; // needed for keyboard ISR and int 30 ISR
 
 	k_clear_screen();
@@ -73,6 +74,10 @@ k_main() // like main
 	k_printf("testing3...\n");
 	k_printf("testing4...\n");
 	k_printf("testing once more...\n");
+
+	k_printf("\nNow trying to malloc one 4kb page of memory...\n");
+	a = (unsigned int*)real_mem_malloc();
+	k_printf("Got it!\n");
 
 
 	while(b!=5)		// the 'idle' loop

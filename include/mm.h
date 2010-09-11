@@ -20,5 +20,7 @@ unsigned long total_physical_ram;
 // functions in mm.c
 unsigned int paging_init();
 void enable_paging();
+void *real_mem_malloc();
+unsigned int real_mem_free(void *PointerToPage);
 
 #endif
