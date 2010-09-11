@@ -10,7 +10,7 @@ LDFLAGS = -T binkrnl.ld
 
 UDI_OBJS = udi\blah.o
 
-KERN_OBJS = kernel.o boiler.o mm.o kbd_isr.o k_printf.o string.o putchar.o rwRegs.o real_time_clock.o rtc.o floppy.o tasks.o TSS.o tss-management.o mutex.o descriptor.o scheduler.o mp.o vga.o vga_utils.o ports.o exceptions.o exceptions_utils.o rand.o idt.o scheduler_utils.o cpu.o threads.o processes.o vbe3.o phys_mm.o
+KERN_OBJS = kernel.o boiler.o mm.o kbd_isr.o k_printf.o string.o putchar.o rwRegs.o real_time_clock.o rtc.o floppy.o tasks.o TSS.o tss-management.o mutex.o descriptor.o scheduler.o mp.o vga.o vga_utils.o ports.o exceptions.o exceptions_utils.o rand.o idt.o scheduler_utils.o cpu.o threads.o processes.o vbe3.o phys_mm.o malloc.o
 KERN_NAME = kernel.bin
 
 all : $(KERN_NAME)

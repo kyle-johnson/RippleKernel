@@ -19,6 +19,8 @@
 #include <tasks.h>
 #include <scheduler.h>
 #include <phys_mm.h>
+#include "include\malloc.h"
+
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -40,7 +42,7 @@ k_main() // like main
 
 	u_short b=0;
 	u_short * a;
-	u_long temp2;
+	u_long temp2, i;
 	u_char temp;
 	amount_of_ticks=0;
 
@@ -117,14 +119,31 @@ k_main() // like main
 	k_printf("Hold your breath, enabling paging...\n");
 	enable_paging();
 	k_printf("YEAH!!! Paging enabled!!!!\n");
-	u_char *valid_add = (u_char *)0x2000000;
-	*valid_add = 0xFF;
-	k_printf("\n\n0x2000000 = 0x%x\n", *valid_add);
+
+	mm_t *mm_tmp = (mm_t *) 0x300000;
+
+	mm_tmp->superpage_bitmap[0] = 0x0000000F;	// first 4 superpages are allocated
+	for(i=4; i<1024; i++)	// set remaining 1,020 superpages to have 1,024 free pages each
+	{
+		mm_tmp->superpage_count[i] = 1024;
+	};
+
+	u_long *test;
+	test = malloc(sizeof(u_long));
+	*test = 0xAABBCCEE;
+	k_printf("\n0x%x\n", *test);
+	u_long *total;
+	total = malloc(sizeof(u_long));
+	*total = 0x11223344;
+	k_printf("0x%x\n", *total);
+	free(total);
+	free(test);
+	k_printf("memory freed!\n");
 
 //	k_printf("\nSwitching tasks...\n");
 //	asm("sti");
 //	asm("int $0x40");
-
+/*
 	k_printf("switching to 320x240 with 256 colors...\n");
 
 	struct Vmode curr_vmode;
@@ -136,7 +155,7 @@ k_main() // like main
 	for(k=0; k<200; k++)
 	{
 		_plot_pixel(k, k, curr_vmode.width, 1);
-	};
+	};*/
 
 
 

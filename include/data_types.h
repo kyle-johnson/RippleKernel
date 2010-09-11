@@ -7,7 +7,7 @@
 #define NULL 0
 #endif
 
-typedef unsigned size_t;
+typedef unsigned long size_t;
 
 // signed data types
 typedef signed char s_char;
