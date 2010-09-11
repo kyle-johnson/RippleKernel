@@ -26,6 +26,20 @@ void make_threads()
 //	create_thread(&My_Threads[1], 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08);
 };
 
+void *the_scheduler(u_long esp)
+{
+	if(first_time == 0)
+	{
+		//k_printf("\nold_esp: 0x%x\n", old_esp);
+		My_Threads[0].esp = esp;
+	} else
+	{
+		first_time = 0;
+	};
+
+	return(My_Threads[0].esp);
+};
+
 void scheduler()
 {
 	// lock_mutex_block(&scheduler_mutex);
@@ -48,6 +62,6 @@ void scheduler()
 	//	new_esp = My_Threads[i].esp;
 	//};
 	//k_printf("new_esp: 0x%x\n", new_esp);
-
+	//putc('z');
 	// unlock_mutex(&scheduler_mutex);
 };

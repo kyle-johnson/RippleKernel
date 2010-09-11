@@ -17,7 +17,7 @@ u_long virt_mem_inti()
 
 	page_dir = pop_phys_mm(0x200000);
 
-	for(i=0; i<1023; i++)
+	for(i=0; i<1024; i++)
 	{
 		page_dir[i] = 2;		// set them to not-present, supervisor level, read/write
 	};
@@ -26,7 +26,7 @@ u_long virt_mem_inti()
 	page_dir[1023] |= 0x3;
 
 	page_table = pop_phys_mm(0x200000);
-	for(i=0; i<1023; i++)	// 0x0 - 0x3FFFFF
+	for(i=0; i<1024; i++)	// 0x0 - 0x3FFFFF
 	{
 		page_table[i] = (u_long)address | 3;
 		address += 0x1000;
@@ -72,12 +72,12 @@ void *kmorecore(u_long n)
 	// lock address space here
 
 	f_size = 0;	// reset count of contiguous free pages
-	for(i=0; i<7; i++)	// search through all 1024 4MB superpages in groups of 32
+	for(i=0; i<8; i++)	// search through all 1024 4MB superpages in groups of 32
 	{
 		if(mm_p->superpage_bitmap[i] != 0xFFFFFFFF)	// if there are free pages in some of the superpages
 		{
 			a = i << 5;
-			for(j=0; j<31; j++)	// find which superpages have free pages
+			for(j=0; j<32; j++)	// find which superpages have free pages
 			{
 				if(mm_p->superpage_count[a + j] >= ((n - f_size) & 0x3FF))	// if superpage possibly has enough free pages... this will result in a slight *bug*: if a superpage doesn't have enough space, whatever it has at the end should be checked to see if it is contiguous with the next superpage, but this small rare occurrence is hereby sacrificed for performance :-)
 				{
@@ -192,12 +192,12 @@ void *morecore(u_long n)
 	// lock address space here
 
 	f_size = 0;	// reset count of contiguous free pages
-	for(i=8; i<31; i++)	// search through all 1024 4MB superpages in groups of 32
+	for(i=8; i<32; i++)	// search through all 1024 4MB superpages in groups of 32
 	{
 		if(mm_p->superpage_bitmap[i] != 0xFFFFFFFF)	// if there are free pages in some of the superpages
 		{
 			a = i << 5;
-			for(j=0; j<31; j++)	// find which superpages have free pages
+			for(j=0; j<32; j++)	// find which superpages have free pages
 			{
 				if(mm_p->superpage_count[a + j] >= ((n - f_size) & 0x3FF))	// if superpage possibly has enough free pages... this will result in a slight *bug*: if a superpage doesn't have enough space, whatever it has at the end should be checked to see if it is contiguous with the next superpage, but this small rare occurrence is hereby sacrificed for performance :-)
 				{

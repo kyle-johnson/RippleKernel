@@ -17,27 +17,33 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 	new_thread->executing = 0;
 	new_thread->sleeping = 0;
 
-	// "push" 7 GP registers
-	for(i = 0; i < 7; i++)
-	{
-		new_thread->stack[i] = 0xFFFFFFFF;
-	};
+	// "push" 6 GP registers
+	//for(i = 0; i < 7; i++)
+	//{
+	//	new_thread->stack[i] = 0xFFFFFFFF;
+	//};
 
-	new_thread->stack[8] = ds;			// ds
-	new_thread->stack[9] = 0x8;			// es
-	new_thread->stack[10] = 0;			// fs
-	new_thread->stack[11] = 0;			// gs
+	new_thread->stack[8] = 0;				// gs
+	new_thread->stack[9] = 0;				// fs
+	new_thread->stack[10] = ds;			// ds
+	new_thread->stack[11] = ds;			// es
 
-	new_thread->stack[12] = eip;			// eip
-	new_thread->stack[13] = cs;			// cs
-	new_thread->stack[14] = 0x200;			// eflags
+	new_thread->stack[12] = 0xABCD1234;
+	new_thread->stack[13] = 0x1234ABCD;
+	new_thread->stack[14] = 0xABCD1234;
+	new_thread->stack[15] = 0x1234ABCD;
+	new_thread->stack[16] = 0xABCD1234;
+	new_thread->stack[17] = 0x1234ABCD;
+	new_thread->stack[18] = 0xABCD1234;
 
-	new_thread->stack[15] = &new_thread->stack[254];	// "old" esp
-	new_thread->stack[16] = ss;			// ss
+	new_thread->stack[19] = eip;			// eip
+	new_thread->stack[20] = cs;			// cs
+	new_thread->stack[21] = 0x200;			// eflags
 
-	//new_thread->stack[3] = &new_thread->stack[4];
+	new_thread->stack[22] = &new_thread->stack[254];	// "old" esp
+	new_thread->stack[23] = ss;			// ss
 
-	new_thread->esp = &new_thread->stack[0];
+	new_thread->esp = &new_thread->stack[8];
 };
 
 void cool_down_thread()

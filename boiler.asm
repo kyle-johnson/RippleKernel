@@ -61,7 +61,7 @@ ds_ok:
 
 almost_done:
 
-	lldt[ldt_ptr]	; this is a NULL ldt
+	lldt [ldt_ptr]		; this is a NULL ldt
 
 	EXTERN bss, end		; zero the BSS
 	mov edi,bss
@@ -70,7 +70,7 @@ almost_done:
 	xor eax,eax
 	rep stosb
 
-	mov esp,_stack			;set up the _stack
+	mov esp,_stack		;set up the _stack
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	; relocate the IDT to 0x600
