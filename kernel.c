@@ -80,14 +80,6 @@ k_main() // like main
 	modify_gate_address((u_long)&irq0, 0x40);
 	k_printf("IRQ0 handler installed.\n");
 
-	// k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
-	// paging_init();
-	// k_printf("Done\n");
-
-	// k_printf("Turning on paging...\n");
-	// enable_paging();
-	// k_printf("Paging enabled!\n\n");
-
 //	k_printf("Setting up the real time clock handler..\n");
 
 //	outportb(0x70, 0x0A);
@@ -128,6 +120,7 @@ k_main() // like main
 	u_char *valid_add = (u_char *)0x2000000;
 	*valid_add = 0xFF;
 	k_printf("\n\n0x2000000 = 0x%x\n", *valid_add);
+
 //	k_printf("\nSwitching tasks...\n");
 //	asm("sti");
 //	asm("int $0x40");

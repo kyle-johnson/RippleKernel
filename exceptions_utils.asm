@@ -2,6 +2,7 @@
 [section .text]
 
 [extern _fault]
+[extern _page_fault]
 [extern _LINEAR_DATA_SEL]
 
 [global _isr0]
@@ -229,7 +230,7 @@ _isr14: ; page fault... this one is IMPORTANT!
 	mov eax, esp
 	mov ax, 0xe
 	push ax
-	mov eax, _fault
+	mov eax, _page_fault
 	call eax
 	pop ax
 	popa

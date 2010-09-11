@@ -24,7 +24,8 @@ start:
 
 	; it is, print a 'D' on screen
 	mov word [0B8000h],9F44h
-	jmp $
+	cli
+	hlt
 
 ; check if data segment linked, located, and loaded properly
 tea:
@@ -34,7 +35,8 @@ tea:
 
 ; display a blinking white-on-blue 'D' and freeze if we aren't linked properly
 	mov word [0B8000h],9F44h
-	jmp short $
+	cli
+	hlt
 
 ds_ok:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -83,7 +85,8 @@ almost_done:
 	EXTERN _k_main
 	call _k_main			;like the 'main' function in C
 
-	jmp $ ;loop forever
+	cli
+	hlt
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Multiboot header for GRUB bootloader. This must be in the first 8K

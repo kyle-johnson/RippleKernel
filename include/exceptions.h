@@ -1,6 +1,7 @@
 #ifndef __EXCEPTIONS_HEADER
 #define __EXCEPTIONS_HEADER
 
+void page_fault();
 void fault(u_char int_num);
 unsigned int panic(char *message);
 

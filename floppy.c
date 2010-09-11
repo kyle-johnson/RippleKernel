@@ -46,7 +46,7 @@ void inti_floppy()
 	floppy_drives[0].type = a;
 	floppy_drives[1].type = b;
 
-	switch(a) {
+	switch(floppy_drives[0].type) {
 		case 0x04:
 			k_printf("Floppy drive A found(1.44 MB 3.5 Drive).\n");
 			break;
@@ -70,7 +70,7 @@ void inti_floppy()
 			break;
 	};
 
-	switch(b) {
+	switch(floppy_drives[1].type) {
 		case 0x04:
 			k_printf("Floppy drive B found(1.44 MB 3.5 Drive).\n");
 			break;
@@ -102,6 +102,7 @@ void inti_floppy()
 	{
 		floppy_drives[0].gap3 = 42;
 	};
+
 	if(floppy_drives[1].type != 1 && floppy_drives[1].type != 2) // most common
 	{
 		floppy_drives[1].gap3 = 27;
@@ -113,6 +114,8 @@ void inti_floppy()
 
 };
 
+// calibrate the floppy drive
+// this will also turn on the drive's motor if it's off
 unsigned char calibrate_floppy(unsigned char drive)
 {
 	unsigned char calibrate_command[] = {FLOPPY_CALIBRATE_DRIVE, drive};
@@ -130,7 +133,7 @@ void start_floppy_motor(unsigned char drive, unsigned char wait)
 {
 	if(floppy_drives[drive].motor_on != 1)
 	{
-		outportb(0x03F2, 0x0C | drive | (1 << (4 + drive)));
+		outportb(FDC_DOR, 0x0C | drive | (1 << (4 + drive)));
 
 		if(wait == 1)
 		{
@@ -233,7 +236,7 @@ unsigned char disk_changed()
 };
 
 // int 0x6 is used by the FDC to tell us whether or not a command was completed
-void irq6(regs_t *regs)
+void irq6()
 {
 	irq6_fired = 1;
 };

@@ -1,6 +1,6 @@
 # makefile for (codename)Spotlight
 CC = gcc
-CFLAGS = -fno-builtins -Ic:\djgpp\myos\include -c
+CFLAGS = -O2 -fno-builtins -Ic:\djgpp\myos\include -c
 
 NASM = nasm
 NASMFLAGS = -f aout -i include
