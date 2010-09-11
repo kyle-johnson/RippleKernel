@@ -70,25 +70,25 @@ almost_done:
 	mov esp,_stack			;set up the _stack
 
 ; set up interrupt handlers, then load IDT register
-	mov ecx,(idt_end - idt) >> 3		; number of exception handlers
-	mov edi,idt
-	mov esi,isr0
+;	mov ecx,(idt_end - idt) >> 3		; number of exception handlers
+;	mov edi,idt
+;	mov esi,isr0
 
-do_idt:
-	mov eax,esi			; EAX=offset of entry point
-	mov [edi],ax			; set low 16 bits of gate offset
-	shr eax,16
-	mov [edi + 6],ax			; set high 16 bits of gate offset
-	add edi,8				; 8 bytes/interrupt gate
-	add esi,(isr1 - isr0)			; bytes/stub
-	loop do_idt
+;do_idt:
+;	mov eax,esi			; EAX=offset of entry point
+;	mov [edi],ax			; set low 16 bits of gate offset
+;	shr eax,16
+;	mov [edi + 6],ax			; set high 16 bits of gate offset
+;	add edi,8				; 8 bytes/interrupt gate
+;	add esi,(isr1 - isr0)			; bytes/stub
+;	loop do_idt
 
-	lidt [idt_ptr]
+;	lidt [idt_ptr]
  
 	IMP k_main
 	call k_main			;like the 'main' function in C
 
-	jmp $ ;crash
+	jmp $ ;loop forever
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Multiboot header for GRUB bootloader. This must be in the first 8K
@@ -110,222 +110,6 @@ mboot:
 	dd bss
 	dd end
 	dd start
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; interrupt/exception handlers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-IMP fault
-
-; I shouldn't have to do this!
-%macro PUSHB 1
-	db 6Ah
-	db %1
-%endmacro
-
-%macro INTR 1				; (byte offset from start of stub)
-isr%1:
-	push byte 0			; ( 0) fake error code
-	PUSHB %1			; ( 2) exception number
-	push gs				; ( 4) push segment registers
-	push fs				; ( 6)
-	push es				; ( 8)
-	push ds				; ( 9)
-	pusha				; (10) push GP registers
-		mov ax,_LINEAR_DATA_SEL	; (11) put known-good values...
-		mov ds,eax		; (15) ...in segment registers
-		mov es,eax		; (17)
-		mov fs,eax		; (19)
-		mov gs,eax		; (21)
-		mov eax,esp		; (23)
-		push eax		; (25) push pointer to regs_t
-.1:
-; setvect() changes the operand of the CALL instruction at run-time,
-; so we need its location = 27 bytes from start of stub. We also want
-; the CALL to use absolute addressing instead of EIP-relative, so:
-			mov eax,fault	; (26)
-			call eax	; (31)
-			jmp all_ints	; (33)
-%endmacro				; (38)
-
-%macro INTR_EC 1
-isr%1:
-	nop				; error code already pushed
-	nop				; nop+nop=same length as push byte
-	PUSHB %1			; ( 2) exception number
-	push gs				; ( 4) push segment registers
-	push fs				; ( 6)
-	push es				; ( 8)
-	push ds				; ( 9)
-	pusha				; (10) push GP registers
-		mov ax,_LINEAR_DATA_SEL	; (11) put known-good values...
-		mov ds,eax		; (15) ...in segment registers
-		mov es,eax		; (17)
-		mov fs,eax		; (19)
-		mov gs,eax		; (21)
-		mov eax,esp		; (23)
-		push eax		; (25) push pointer to regs_t
-.1:
-; setvect() changes the operand of the CALL instruction at run-time,
-; so we need its location = 27 bytes from start of stub. We also want
-; the CALL to use absolute addressing instead of EIP-relative, so:
-			mov eax,fault	; (26)
-			call eax	; (31)
-			jmp all_ints	; (33)
-%endmacro				; (38)
-
-; the vector within the stub (operand of the CALL instruction)
-; is at (isr0.1 - isr0 + 1)
-
-all_ints:
-	pop eax
-	popa				; pop GP registers
-	pop ds				; pop segment registers
-	pop es
-	pop fs
-	pop gs
-	add esp,8			; drop exception number and error code
-	iret
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; name:			getvect
-; action:		reads interrupt vector
-; in:			[EBP + 12] = vector number
-; out:			vector stored at address given by [EBP + 8]
-; modifies:		EAX, EDX
-; minimum CPU:		'386+
-; notes:		C prototype:
-;			typedef struct
-;			{	unsigned access_byte, eip; } vector_t;
-;			getvect(vector_t *v, unsigned vect_num);
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-EXP getvect
-	push ebp
-		mov ebp,esp
-		push esi
-		push ebx
-			mov esi,[ebp + 8]
-
-; get access byte from IDT[i]
-			xor ebx,ebx
-			mov bl,[ebp + 12]
-			shl ebx,3
-			mov al,[idt + ebx + 5]
-			mov [esi + 0],eax
-
-; get handler address from stub
-			mov eax,isr1
-			sub eax,isr0	; assume stub size < 256 bytes
-			mul byte [ebp + 12]
-			mov ebx,eax
-			add ebx,isr0
-			mov eax,[ebx + (isr0.1 - isr0 + 1)]
-			mov [esi + 4],eax
-		pop ebx
-		pop esi
-	pop ebp
-	ret
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; name:			setvect
-; action:		writes interrupt vector
-; in:			[EBP + 12] = vector number,
-;			vector stored at address given by [EBP + 8]
-; out:			(nothing)
-; modifies:		EAX, EDX
-; minimum CPU:		'386+
-; notes:		C prototype:
-;			typedef struct
-;			{	unsigned access_byte, eip; } vector_t;
-;			getvect(vector_t *v, unsigned vect_num);
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-EXP setvect
-	push ebp
-		mov ebp,esp
-		push esi
-		push ebx
-			mov esi,[ebp + 8]
-
-; store access byte in IDT[i]
-			mov eax,[esi + 0]
-			xor ebx,ebx
-			mov bl,[ebp + 12]
-			shl ebx,3
-			mov [idt + ebx + 5],al
-
-; store handler address in stub
-			mov eax,isr1
-			sub eax,isr0	; assume stub size < 256 bytes
-			mul byte [ebp + 12]
-			mov ebx,eax
-			add ebx,isr0
-			mov eax,[esi + 4]
-			mov [ebx + (isr0.1 - isr0 + 1)],eax
-		pop ebx
-		pop esi
-	pop ebp
-	ret
-
-	INTR 0		; zero divide (fault)
-	INTR 1		; debug/single step
-	INTR 2		; non-maskable interrupt (trap)
-	INTR 3		; INT3 (trap)
-	INTR 4		; INTO (trap)
-	INTR 5		; BOUND (fault)
-	INTR 6		; invalid opcode (fault)
-	INTR 7		; coprocessor not available (fault)
-	INTR_EC 8	; double fault (abort w/ error code)
-	INTR 9		; coproc segment overrun (abort; 386/486SX only)
-	INTR_EC 0Ah	; bad TSS (fault w/ error code)
-	INTR_EC 0Bh	; segment not present (fault w/ error code)
-	INTR_EC 0Ch	; _stack fault (fault w/ error code)
-	INTR_EC 0Dh	; GPF (fault w/ error code)
-	INTR_EC 0Eh	; page fault
-	INTR 0Fh	; reserved
-	INTR 10h	; FP exception/coprocessor error (trap)
-	INTR 11h	; alignment check (trap; 486+ only)
-	INTR 12h	; machine check (Pentium+ only)
-	INTR 13h
-	INTR 14h
-	INTR 15h
-	INTR 16h
-	INTR 17h
-	INTR 18h
-	INTR 19h
-	INTR 1Ah
-	INTR 1Bh
-	INTR 1Ch
-	INTR 1Dh
-	INTR 1Eh
-	INTR 1Fh
-	INTR 20h
-	INTR 21h
-	INTR 22h
-	INTR 23h
-	INTR 24h
-	INTR 25h
-	INTR 26h
-	INTR 27h
-	INTR 28h
-	INTR 29h
-	INTR 2Ah
-	INTR 2Bh
-	INTR 2Ch
-	INTR 2Dh
-	INTR 2Eh
-	INTR 2Fh
-	INTR 30h
-
-%assign i 31h
-%rep (0FFh - 30h)
-
-	INTR i
-
-%assign i (i + 1)
-%endrep
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -371,19 +155,19 @@ gdt_ptr:
 
 ; 256 ring 0 interrupt gates
 
-idt:
-%rep 256
-	dw 0				; offset 15:0
-	dw _LINEAR_CODE_SEL		; selector
-	db 0				; (always 0 for interrupt gates)
-	db 8Eh				; present,ring 0,'386 interrupt gate
-	dw 0				; offset 31:16
-%endrep
-idt_end:
+;idt:
+;%rep 256
+;	dw 0				; offset 15:0
+;	dw _LINEAR_CODE_SEL		; selector
+;	db 0				; (always 0 for interrupt gates)
+;	db 8Eh				; present,ring 0,'386 interrupt gate
+;	dw 0				; offset 31:16
+;%endrep
+;idt_end:
 
-idt_ptr:
-	dw idt_end - idt - 1			; IDT limit
-	dd idt				; linear adr of IDT
+;idt_ptr:
+;	dw idt_end - idt - 1			; IDT limit
+;	dd idt				; linear adr of IDT
 
 [global _stack]
 

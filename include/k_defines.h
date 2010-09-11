@@ -36,11 +36,6 @@ typedef struct
 	unsigned access_byte, eip;
 } vector_t;
 
-// IMPORTS
-// from boiler.asm
-void getvect(vector_t *v, unsigned vect_num);
-void setvect(vector_t *v, unsigned vect_num);
-
 // needed for IRQ enableing
 USHORT irqs;
 
@@ -62,9 +57,6 @@ typedef struct
 void remap_pics(int pic1, int pic2);
 void unmask_irq(int irq);
 void mask_irq(int irq);
-
-void fault(regs_t *regs);
-unsigned int panic(char *message);
 
 void k_clear_screen();
 void update_cursor(int row, int col);

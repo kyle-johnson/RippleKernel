@@ -47,33 +47,6 @@ k_main() // like main
 	remap_pics(0x40, 0x48);	// irq 0 40h irq 8 48h
 	k_printf("PIC remapped starting at 40 hex.\n");
 
-	k_printf("Enabling keyboard(IRQ 1).\n");
-	unmask_irq(1);		//enable the keyboard IRQ
-
-	k_printf("Disabling timer(IRQ 0).\n");
-	mask_irq(0);		//disable the timer IRQ
-
-	scheduler_vector.eip = (unsigned)irq_0;
-	scheduler_vector.access_byte = 0x8E;
-
-	k_printf("Changing interrupt vector for IRQ 1(keyboard)\n");
-	v.eip = (unsigned)kbd_isr;
-	v.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
-	setvect(&v, 0x41);		// okay, DO IT!
-
-	task_jumper.eip = (unsigned)int_31;
-	task_jumper.access_byte = 0x8E;
-	setvect(&task_jumper, 0x31);
-
-	k_printf("Setting up IRQ 6(floppy...\n");
-	v.eip = (unsigned)irq6;
-	v.access_byte = 0x8E;	// present, ring 0, 386 interrupt gate
-	setvect(&v, 0x46);
-	unmask_irq(6);
-
-	k_printf("Enabling interrupts\n");
-	asm("sti");
-
 	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
 	paging_init();
 	k_printf("Done\n");
@@ -94,50 +67,25 @@ k_main() // like main
 
 	k_printf("Setting up the real time clock handler..\n");
 	disable_ints(); // disable interrupts while changing an interrupt handler
-	real_clock_vector.eip = (unsigned)real_time_clock_ISR;
-	real_clock_vector.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
-	setvect(&real_clock_vector, 0x48);
-	unmask_irq(8);
-	enable_ints(); // renable interrupts
-	k_printf("Real time clock handler has been set up and IRQ 8 has been unmasked..\n\n");
 
-	outportb(0x70, 0x0A);
-	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
-
-	k_printf("The real time clock will now be enabled for 6 seconds, then disabled...\n");
-
-	enable_rtc();
-//	sleep(6*1024);
-
-	mask_irq(8);
-	disable_rtc();
-	k_printf("%c seconds have passed and the real time %s has been %s.\n\n", '6', "clock", "disabled");
+//	outportb(0x70, 0x0A);
+//	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
 
 	k_printf("Now attempting to find floppy drives...\n");
-	inti_floppy();
+//	inti_floppy();
 
-	unmask_irq(8);
-	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
+//	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
 
-	if(calibrate_floppy(0) == 0)
-	{
-		k_printf("The first floppy drive has been calibrated!!!\n");
-	}
-	else
-	{
-		k_printf("The first floppy drive hasn't been calibrated :( \n");
-	};
-	char hours[3], minutes[3], seconds[3];
-	get_time_str(0, &hours, &minutes, &seconds);
-	k_printf("%s:%s:%s\n\n", hours, minutes, seconds);
+//	if(calibrate_floppy(0) == 0)
+//	{
+//		k_printf("The first floppy drive has been calibrated!!!\n");
+//	}
+//	else
+//	{
+//		k_printf("The first floppy drive hasn't been calibrated :( \n");
+//	};
 
-//	setup_up_tsses();
-//	load_first_ltr();
-	setvect(&scheduler_vector, 0x40);
-//	unmask_irq(0);
-//	jmp_tss_1();
 
-//	is_mp_present();
 	k_printf("switching to 320x240 with 256 colors...\n");
 
 	struct Vmode curr_vmode;
@@ -236,44 +184,4 @@ void mask_irq(int irq)
         outportb(PIC1_DATA, irqs&0xFF);
     else
         outportb(PIC2_DATA, irqs>>8);
-};
-
-//////////////////////////////////////////////////////////////////////////////////
-
-void fault(regs_t *regs)
-{
-	k_printf("%d", regs->which_int);
-	if(regs->which_int==0x40)	// timer(IRQ 0)
-	{
-		outportb(0x20, 0x20);
-	}
-	else if(regs->which_int == 0x0E)
-	{
-		;
-	}
-	else
-	{
-		panic("System fault...  You need to restart your computer.");
-		asm("cli");
-		asm("hlt");
-		outportb(0x20, 0x20);
-	};
-};
-
-unsigned int panic(char *message)
-{
-	unsigned int i=0;
-	unsigned int line=0;
-
-	i=(line*80*2);
-
-	while(*message!=0)
-	{
-		vidmem[i]=*message;
-		*message++;
-		i++;
-		vidmem[i]=0x9; // use blue text
-		i++;
-	};
-	return(1);
 };
