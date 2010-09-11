@@ -44,5 +44,6 @@ typedef struct {
 #pragma pack (pop)
 
 void make_descriptor(DESCRIPTOR *the_descriptor, u_long arg1, u_long arg2, u_long arg3);
+void make_tss_desc(DESCRIPTOR *the_descriptor, u_long arg1, u_long arg2);
 
 #endif

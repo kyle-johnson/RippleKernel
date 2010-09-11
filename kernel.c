@@ -1,11 +1,13 @@
+#include <data_types.h>
 #include <k_defines.h>
 #include <mm.h>
 #include <putchar.h>
-#include <data_types.h>
 #include <floppy.h>
 #include <real_time_clock.h>
 #include <k_printf.h>
 #include <tss.h>
+#include <descriptor.h>
+#include <scheduler.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -26,7 +28,7 @@ k_main() // like main
 	unsigned int b=0;
 	unsigned int * a;
 	unsigned long temp2;
-	vector_t v, soft, real_clock_vector, task_jumper; // needed for keyboard ISR and int 30 ISR
+	vector_t v, soft, real_clock_vector, task_jumper, scheduler_vector; // needed for keyboard ISR and int 30 ISR
 	amount_of_ticks=0;
 	unsigned char temp;
 
@@ -44,7 +46,10 @@ k_main() // like main
 	unmask_irq(1);		//enable the keyboard IRQ
 
 	k_printf("Disabling timer(IRQ 0).\n");
-	mask_irq(0);		//disenable the timer IRQ
+	mask_irq(0);		//disable the timer IRQ
+
+	scheduler_vector.eip = (unsigned)irq_0;
+	scheduler_vector.access_byte = 0x8E;
 
 	k_printf("Changing interrupt vector for IRQ 1(keyboard)\n");
 	v.eip = (unsigned)kbd_isr;
@@ -137,7 +142,6 @@ k_main() // like main
 	{
 		k_printf("The first floppy drive hasn't been calibrated :( \n");
 	};
-
 	char hours[3], minutes[3], seconds[3];
 	get_time_str(0, &hours, &minutes, &seconds);
 	k_printf("%s:%s:%s", hours, minutes, seconds);
@@ -146,9 +150,11 @@ k_main() // like main
 
 	setup_up_tsses();
 	load_first_ltr();
+	setvect(&scheduler_vector, 0x40);
+	unmask_irq(0);
 	jmp_tss_1();
 
-	while(b!=5)		// the 'idle' loop
+	for(;;)		// the 'idle' loop
 	{
 		asm("hlt");
 	};
@@ -259,7 +265,7 @@ void mask_irq(int irq)
 
 void fault(regs_t *regs)
 {
-	k_printf("0x%x", regs->which_int);
+	k_printf("%d", regs->which_int);
 	if(regs->which_int==0x40)	// timer(IRQ 0)
 	{
 		outportb(0x20, 0x20);

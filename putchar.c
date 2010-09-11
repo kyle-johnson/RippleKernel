@@ -16,7 +16,7 @@ void putc(unsigned char c)
 {
 	unsigned int vid_mem_spot;
 
-	lock_mutex_block(&putc_mutex);
+	//lock_mutex_block(&putc_mutex);
 
 	switch(c)
 	{
@@ -59,5 +59,5 @@ void putc(unsigned char c)
 
 	update_cursor(_csr_y, _csr_x);
 
-	unlock_mutex(&putc_mutex);
+	//unlock_mutex(&putc_mutex);
 };

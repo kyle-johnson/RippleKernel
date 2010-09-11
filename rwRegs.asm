@@ -4,6 +4,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [bits 32]
 
+[global _write_cr4] ; this is for implimenting x86-64
+_write_cr4:
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; to be implimented ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[global _read_cr4] ; this is for implimenting x86-64
+_read_cr4:
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; to be implimented ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[global _write_cr8] ; this is for implimenting x86-64
+_write_cr8:
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; to be implimented ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[global _read_cr8] ; this is for implimenting x86-64
+_read_cr8:
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; to be implimented ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 [global _read_cr0]
 _read_cr0:
 	mov eax, cr0

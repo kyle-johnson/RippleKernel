@@ -178,7 +178,7 @@ isr%1:
 ; is at (isr0.1 - isr0 + 1)
 
 all_ints:
-		pop eax
+	pop eax
 	popa				; pop GP registers
 	pop ds				; pop segment registers
 	pop es
@@ -378,6 +378,9 @@ _TSS_ENTRY_0		equ	$-gdt
 [global _TSS_ENTRY_1]
 _TSS_ENTRY_1		equ	$-gdt
 	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
+[global _TSS_ENTRY_2]
+_TSS_ENTRY_2		equ	$-gdt
+	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
 
 gdt_end:
 
@@ -402,9 +405,6 @@ idt_ptr:
 	dd idt				; linear adr of IDT
 
 [global _stack]
-
-[global _extra_tss]
-_extra_tss	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [SECTION .bss]
