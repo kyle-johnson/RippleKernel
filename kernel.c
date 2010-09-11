@@ -33,7 +33,8 @@ k_main() // like main
 
 	u_short b=0;
 	u_short * a;
-	u_long temp2, i;
+	u_huge temp2;
+	u_long i;
 	u_char temp;
 	amount_of_ticks=0;
 
@@ -60,65 +61,45 @@ k_main() // like main
 
 	setup_irqs(); // do this before messing with ANYTHING that uses IRQs
 
-//	k_printf("\nSetting up the keyboard...\n");
-//	setup_keyboard();
-
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
 	modify_gate_address((u_long)&irq0, 0x40, 1);
 	k_printf("IRQ0 handler installed.\n");
 
 //	k_printf("Setting up the real time clock handler..\n");
-
 //	outportb(0x70, 0x0A);
 //	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
-
 //	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
 
-//	is_mp_present();
-
-//	identify_cpu();
-
 	k_printf("\n%x\n", setup_phys_mm_stack(0x200000));
-	u_long *phys_page_stack = (u_long *)0x200000;
-	for(temp2 = 0x300000; temp2 < 0xB00000; temp2 += 4096)
+	for(temp2 = 0x400000; temp2 < 0x2000000; temp2 += 0x400000)
 	{
+		k_printf("Pushing page address: 0x%x\n", temp2);
 		push_phys_mm(0x200000, temp2);
 	};
 
-	k_printf("Pages pushed onto the stack for the first 16MB of memory.\n");
+	k_printf("4MB pages pushed onto the stack for the first 32MB of memory.\n");
+	asm("cli"); asm("hlt");
+
 	write_cr3(virt_mem_inti());
 	k_printf("First page directory and page table setup...\nCR3 loaded with the page directory's address.\n");
 	k_printf("Hold your breath, enabling paging...\n");
 	enable_paging();
 	k_printf("YEAH!!! Paging enabled!!!!\n");
 
-	mm_t *mm_tmp = (mm_t *) 0x300000;
+//	mm_t *mm_tmp = (mm_t *) 0x300000;
 
-	mm_tmp->superpage_bitmap[0] = 0x0000000F;	// first 4 superpages are allocated
-	for(i=4; i<1023; i++)	// set remaining 1,020 superpages to have 1,024 free pages each
-	{
-		mm_tmp->superpage_count[i] = 1024;
-	};
+//	mm_tmp->superpage_bitmap[0] = 0x0000000F;	// first 4 superpages are allocated
+//	for(i=4; i<1023; i++)	// set remaining 1,020 superpages to have 1,024 free pages each
+//	{
+//		mm_tmp->superpage_count[i] = 1024;
+//	};
 
-	u_long *test;
-	test = malloc(sizeof(u_long));
-	*test = 0xAABBCCEE;
-	k_printf("\n0x%x\n", *test);
-	u_long *total;
-	total = malloc(sizeof(u_long));
-	*total = 0x11223344;
-	k_printf("0x%x\n", *total);
-	free(total);
-	free(test);
-	k_printf("memory freed!\n");
+//	k_printf("\nSetting up 3 tasks...\n");
+//	make_threads();
 
+//	k_printf("\nSwitching tasks...\n");
 
-	k_printf("\nSetting up 3 tasks...\n");
-	make_threads();
-
-	k_printf("\nSwitching tasks...\n");
-
-	cool_down_thread();
+//	cool_down_thread();
 
 /*
 	k_printf("switching to 320x240 with 256 colors...\n");
