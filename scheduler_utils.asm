@@ -3,6 +3,7 @@
 [extern _scheduler]
 [extern _LINEAR_DATA_SEL]
 [extern _new_esp]
+[extern _old_esp]
 
 [global _irq0]
 _irq0:
@@ -11,10 +12,10 @@ _irq0:
 	push fs
 	push es
 	push ds
-	pusha				; push GP registers
+	pushad
 
 	mov eax, esp			; this way the _scheduler routine can get the old esp
-	push eax
+	mov [_old_esp], eax
 
 	mov eax, _LINEAR_DATA_SEL	; setup segment registers
 	mov ds, eax
@@ -29,11 +30,9 @@ _irq0:
 	mov al, 0x20
 	out 0x20, al
 
-	pop eax				; get rid of the esp on the stack
-
 	mov esp, [_new_esp]
 
-	popa				; pop GP registers
+	popad
 	pop ds				; pop segment registers
 	pop es
 	pop fs

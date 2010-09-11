@@ -17,7 +17,7 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 	new_thread->executing = 0;
 	new_thread->sleeping = 0;
 
-	// "push" 8 GP registers
+	// "push" 7 GP registers
 	for(i = 0; i < 7; i++)
 	{
 		new_thread->stack[i] = 0xFFFFFFFF;
@@ -35,6 +35,8 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 	new_thread->stack[15] = &new_thread->stack[254];	// "old" esp
 	new_thread->stack[16] = ss;			// ss
 
+	//new_thread->stack[3] = &new_thread->stack[4];
+
 	new_thread->esp = &new_thread->stack[0];
 };
 
@@ -42,7 +44,7 @@ void cool_down_thread()
 {
 	for(;;)
 	{
-		asm("int $0x40");
-		//asm("hlt");
+		//asm("int $0x40");
+		asm("hlt");
 	};
 };

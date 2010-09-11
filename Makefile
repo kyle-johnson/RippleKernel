@@ -31,10 +31,7 @@ $(UDI_OBJS):
 
 # link them all together
 $(KERN_NAME) : $(KERN_OBJS) $(UDI_OBJS)
-	$(LD)  $(LDFLAGS) -o $(KERN_NAME) $(KERN_OBJS) $(UDI_OBJS)
+	$(LD)  $(LDFLAGS) -Map os.map -o $(KERN_NAME) $(KERN_OBJS) $(UDI_OBJS)
 
 clean:
 	del *.o
-
-map:
-	$(LD)  $(LDFLAGS) -Map os.map -o $(KERN_NAME) $(KERN_OBJS) $(UDI_OBJS)

@@ -7,7 +7,7 @@ typedef struct {
 	process_struct *ptrToProcess;
 } thread_info_block;
 
-void scheduler(u_long old_esp);
+void scheduler();
 void make_threads();
 
 extern irq0;

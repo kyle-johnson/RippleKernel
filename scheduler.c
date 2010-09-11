@@ -14,6 +14,7 @@ u_char first_time=1;
 
 thread_struct My_Threads[1];
 u_long new_esp;
+u_long old_esp;
 
 void make_threads()
 {
@@ -25,27 +26,28 @@ void make_threads()
 //	create_thread(&My_Threads[1], 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08);
 };
 
-void scheduler(u_long old_esp)
+void scheduler()
 {
-	lock_mutex_block(&scheduler_mutex);
+	// lock_mutex_block(&scheduler_mutex);
 
 	if(first_time == 0)
 	{
-		k_printf("\nold_esp: 0x%x\n", old_esp);
-		My_Threads[i].esp = old_esp;
-	};
-	first_time = 0;
-	i++;
-	
-	if(i<__total_num_threads)
-	{
-		new_esp = My_Threads[i].esp;
+		//k_printf("\nold_esp: 0x%x\n", old_esp);
+		My_Threads[0].esp = old_esp;
 	} else
 	{
-		i = 0;
-		new_esp = My_Threads[i].esp;
+		first_time = 0;
 	};
-	k_printf("new_esp: 0x%x\n", new_esp);
 
-	unlock_mutex(&scheduler_mutex);
+	//if(i<__total_num_threads)
+	//{
+		new_esp = My_Threads[0].esp;
+	//} else
+	//{
+	//	i = 0;
+	//	new_esp = My_Threads[i].esp;
+	//};
+	//k_printf("new_esp: 0x%x\n", new_esp);
+
+	// unlock_mutex(&scheduler_mutex);
 };
