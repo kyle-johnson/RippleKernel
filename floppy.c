@@ -131,9 +131,9 @@ void start_floppy_motor(unsigned char drive, unsigned char wait)
 	{
 		outportb(0x03F2, 0x0C | drive | (1 << (4 + drive)));
 
-		k_printf("Waiting for floppy drive %d to spin up...\n", drive);
 		if(wait == 1)
 		{
+			k_printf("Waiting for floppy drive %d to spin up...\n", drive);
 			sleep(500); // wait for the motor to spin up
 		};
 		floppy_drives[drive].motor_on = 1;

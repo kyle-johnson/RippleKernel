@@ -133,6 +133,10 @@ k_main() // like main
 		k_printf("The first floppy drive hasn't been calibrated :( \n");
 	};
 
+	char hours[3], minutes[3], seconds[3];
+	get_time_str(0, &hours, &minutes, &seconds);
+	k_printf("%s:%s:%s", hours, minutes, seconds);
+
 	while(b!=5)		// the 'idle' loop
 	{
 		asm("hlt");
