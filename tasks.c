@@ -10,6 +10,17 @@ void task_1()
 		putc('b');
 		putc('c');
 		//asm("int $0x40");
+		putc('d');
+		putc('e');
+		putc('f');
+		putc('g');
+		putc('h');
+		putc('i');
+		putc('j');
+		putc('k');
+		putc('l');
+		putc('m');
+		putc('n');
 	};
 };
 

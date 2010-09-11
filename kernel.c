@@ -147,7 +147,7 @@ k_main() // like main
 	unmask_irq(0);
 //	asm("jmp _task_1");
 	asm("sti");
-//	asm("int $0x40");
+	asm("int $0x40");
 /*
 	k_printf("switching to 320x240 with 256 colors...\n");
 

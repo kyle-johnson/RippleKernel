@@ -31,6 +31,9 @@ _irq0:
 	extern _the_scheduler
 	call _the_scheduler
 
+	mov al, 0x20
+	out 0x20, al
+
 	pop ebx
 	mov esp, eax
 	pop gs
