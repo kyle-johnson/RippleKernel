@@ -1,7 +1,7 @@
 // basic putc function
 // by K.J.		5.7.2002
-#include <k_defines.h>
 #include <data_types.h>
+#include <k_defines.h>
 #include <string.h>
 #include <mutex.h>
 #include <putchar.h>
@@ -14,7 +14,7 @@ u_char putc_mutex=0;
 
 void putc(unsigned char c)
 {
-	unsigned int vid_mem_spot;
+	u_short vid_mem_spot;
 
 	//lock_mutex_block(&putc_mutex);
 
@@ -51,7 +51,6 @@ void putc(unsigned char c)
 	};
 	if(_csr_y > 24)		// we are at the bottom visable line
 	{
-		// asm("cli : hlt");
 		_memcpy(0xB8000, 0xB8000+(80*2), 24*80*2);	// scroll the video memory up a line
 		_memsetw(0xB8000+(24*80*2), 0x0720, 80);	// clear the bottom line
 		_csr_y=24;

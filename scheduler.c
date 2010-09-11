@@ -1,5 +1,6 @@
 #include <data_types.h>
 #include <k_defines.h>
+#include <ports.h>
 #include <mutex.h>
 #include <descriptor.h>
 #include <tss.h>

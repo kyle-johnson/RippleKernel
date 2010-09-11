@@ -1,5 +1,5 @@
-#ifndef MM_HEADER
-#define MM_HEADER
+#ifndef __MM_HEADER
+#define __MM_HEADER
 
 struct mm_tracking {
 	unsigned long page_usage_bitmap[32768];

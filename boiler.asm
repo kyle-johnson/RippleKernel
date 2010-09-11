@@ -268,11 +268,6 @@ EXP setvect
 	pop ebp
 	ret
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; interrupt/exception stubs
-; *** CAUTION: these must be consecutive, and must all be the same size.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 	INTR 0		; zero divide (fault)
 	INTR 1		; debug/single step
 	INTR 2		; non-maskable interrupt (trap)
@@ -305,30 +300,23 @@ EXP setvect
 	INTR 1Dh
 	INTR 1Eh
 	INTR 1Fh
-
-; isr20 through isr2F are hardware interrupts. The 8259 programmable
-; interrupt controller (PIC) chips must be reprogrammed to make these work.
-	INTR 20h	; IRQ 0/timer interrupt
-	INTR 21h	; IRQ 1/keyboard interrupt
+	INTR 20h
+	INTR 21h
 	INTR 22h
 	INTR 23h
 	INTR 24h
 	INTR 25h
-	INTR 26h	; IRQ 6/floppy interrupt
+	INTR 26h
 	INTR 27h
-	INTR 28h	; IRQ 8/real-time clock interrupt
+	INTR 28h
 	INTR 29h
 	INTR 2Ah
 	INTR 2Bh
 	INTR 2Ch
-	INTR 2Dh	; IRQ 13/math coprocessor interrupt
-	INTR 2Eh	; IRQ 14/primary ATA ("IDE") drive interrupt
-	INTR 2Fh	; IRQ 15/secondary ATA drive interrupt
-
-; syscall software interrupt
+	INTR 2Dh
+	INTR 2Eh
+	INTR 2Fh
 	INTR 30h
-
-; the other 207 vectors are undefined
 
 %assign i 31h
 %rep (0FFh - 30h)
@@ -375,13 +363,6 @@ _LINEAR_CODE_SEL	equ	$-gdt
 [global _TSS_ENTRY_0]
 _TSS_ENTRY_0		equ	$-gdt
 	desc TSS_START, TSS_SIZE, D_TSS	
-[global _TSS_ENTRY_1]
-_TSS_ENTRY_1		equ	$-gdt
-	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
-[global _TSS_ENTRY_2]
-_TSS_ENTRY_2		equ	$-gdt
-	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
-
 gdt_end:
 
 gdt_ptr:

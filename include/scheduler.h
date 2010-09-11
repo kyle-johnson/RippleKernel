@@ -1,5 +1,5 @@
-#ifndef SCHEDULER_HEADER
-#define SCHEDULER_HEADER
+#ifndef __SCHEDULER_HEADER
+#define __SCHEDULER_HEADER
 
 void irq_0();
 

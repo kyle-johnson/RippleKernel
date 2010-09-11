@@ -1,5 +1,5 @@
-#ifndef DATA_TYPES_HEADER
-#define DATA_TYPES_HEADER
+#ifndef __DATA_TYPES_HEADER
+#define __DATA_TYPES_HEADER
 // typedeffs for u_long, u_short, etc
 
 // define NULL if compiler hasn't

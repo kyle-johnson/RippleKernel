@@ -1,6 +1,6 @@
 // this file is based on John Fine's gdtnasm.inc
-#ifndef DESCRIPTOR_HEADER
-#define DESCRIPTOR_HEADER
+#ifndef __DESCRIPTOR_HEADER
+#define __DESCRIPTOR_HEADER
 
 // each descriptor must have one of the next 8 codes to define
 // the type of descriptor

@@ -1,5 +1,5 @@
-#ifndef DMA_HEADER
-#define DMA_HEADER
+#ifndef __DMA_HEADER
+#define __DMA_HEADER
 
 #define FP_SEG(fp)	(((FARPTR) fp) >> 16)
 #define FP_OFF(fp)	(((FARPTR) fp) & 0xffff)

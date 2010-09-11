@@ -1,5 +1,5 @@
-#ifndef REAL_TIME_CLOCK_HEADER
-#define REAL_TIME_CLOCK_HEADER
+#ifndef __REAL_TIME_CLOCK_HEADER
+#define __REAL_TIME_CLOCK_HEADER
 
 volatile unsigned int amount_of_ticks;
 

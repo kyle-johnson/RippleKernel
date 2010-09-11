@@ -1,5 +1,6 @@
-#include <k_defines.h>
 #include <data_types.h>
+#include <k_defines.h>
+#include <ports.h>
 #include <real_time_clock.h>
 
 void real_time_clock_ISR(regs_t *regs)
@@ -17,6 +18,7 @@ void real_time_clock_ISR(regs_t *regs)
 };
 
 // gets the time from the RTC(in 24 hour format) and puts it into strings
+//	BUG: "9" for some reason is displayed as an "s"
 void get_time_str(u_char no_leading_zero, char *hr, char *min, char *sec)
 {
 	char num_to_char[9] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }; // for converting numbers into charactors

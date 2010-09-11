@@ -1,5 +1,5 @@
-#ifndef STRING_HEADER
-#define STRING_HEADER
+#ifndef __STRING_HEADER
+#define __STRING_HEADER
 #include <data_types.h>
 
 void _memsetb(void *dest, u_char c, u_long n);

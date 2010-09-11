@@ -4,8 +4,9 @@
   wrote, and I have just done a tad here 'n' there to make
   them more readable for me.
 ***************************************************************/
-#include <k_defines.h>
 #include <data_types.h>
+#include <k_defines.h>
+#include <ports.h>
 #include <real_time_clock.h>
 #include <floppy.h>
 

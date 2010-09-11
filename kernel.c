@@ -1,5 +1,6 @@
 #include <data_types.h>
 #include <k_defines.h>
+#include <ports.h>
 #include <mm.h>
 #include <putchar.h>
 #include <floppy.h>
@@ -8,6 +9,10 @@
 #include <tss.h>
 #include <descriptor.h>
 #include <scheduler.h>
+#include <mp.h>
+#include <vga.h>
+#include <vga_utils.h>
+#include <logo.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -28,7 +33,7 @@ k_main() // like main
 	unsigned int b=0;
 	unsigned int * a;
 	unsigned long temp2;
-	vector_t v, soft, real_clock_vector, task_jumper, scheduler_vector; // needed for keyboard ISR and int 30 ISR
+	vector_t v, real_clock_vector, task_jumper, scheduler_vector; // needed for keyboard ISR and int 30 ISR
 	amount_of_ticks=0;
 	unsigned char temp;
 
@@ -36,7 +41,7 @@ k_main() // like main
 	k_load();
 	k_clear_screen();
 
-	k_printf("Welcome to Simplified OS GRUB version.\n\nRight now the kernel is loaded at 1MB physical.\n\n");
+	k_printf("Right now the kernel is loaded at 1MB physical.\n\n");
 
 	k_printf("Remapping the PIC...\n");
 	remap_pics(0x40, 0x48);	// irq 0 40h irq 8 48h
@@ -66,17 +71,8 @@ k_main() // like main
 	setvect(&v, 0x46);
 	unmask_irq(6);
 
-	k_printf("Changing interrupt vector for int 30(software interrupt)\n");
-	soft.eip = (unsigned)int30;
-	soft.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
-	setvect(&soft, 0x30);		// okay, DO IT!
-
 	k_printf("Enabling interrupts\n");
-	enable_ints();
-
-	k_printf("Testing Int 0x30\n\n");
-	asm ("movl $0x1, %eax");
-	asm ("int $0x30");
+	asm("sti");
 
 	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
 	paging_init();
@@ -85,17 +81,6 @@ k_main() // like main
 	k_printf("Turning on paging...\n");
 	enable_paging();
 	k_printf("Paging enabled!\n");
-
-	k_printf("testing int 0x30 once more...\n\n");
-
-	asm ("movl $0x1, %eax");
-	asm ("int $0x30");
-
-	k_printf("testing...\n\n");
-	k_printf("testing2...\n\n");
-	k_printf("testing3...\n");
-	k_printf("testing4...\n");
-	k_printf("testing once more...\n");
 
 	k_printf("\nNow trying to malloc one 4kb page of memory...\n");
 	a = (unsigned int*)real_mem_malloc();
@@ -144,15 +129,31 @@ k_main() // like main
 	};
 	char hours[3], minutes[3], seconds[3];
 	get_time_str(0, &hours, &minutes, &seconds);
-	k_printf("%s:%s:%s", hours, minutes, seconds);
+	k_printf("%s:%s:%s\n\n", hours, minutes, seconds);
 
-	k_printf("\ndo you see a percent sign below this line?\n%%\n");
-
-	setup_up_tsses();
-	load_first_ltr();
+//	setup_up_tsses();
+//	load_first_ltr();
 	setvect(&scheduler_vector, 0x40);
-	unmask_irq(0);
-	jmp_tss_1();
+//	unmask_irq(0);
+//	jmp_tss_1();
+
+//	is_mp_present();
+	k_printf("switching to 320x240 with 256 colors...\n");
+
+	struct Vmode curr_vmode;
+	SetModeMODE_X(&curr_vmode);
+	UnchainedClear(0, curr_vmode.width_bytes);
+
+	u_short x, z, k=0;
+
+	for(z=0; z<13; z++)
+	{
+		for(x=0; x<19; x++)
+		{
+			_plot_pixel(x, z, curr_vmode.width, logo[k]);
+			k++;
+		};
+	};
 
 	for(;;)		// the 'idle' loop
 	{
@@ -185,30 +186,6 @@ unsigned int k_load() // loads whatever has to be loaded
 
 	return(1); // no problems
 };
-
-/* ==============  */
-
-inline void outportb(unsigned int port,unsigned char value)  // Output a byte to a port
-{
-    asm volatile ("outb %%al,%%dx"::"d" (port), "a" (value));
-};
-
-inline void outportw(unsigned int port,unsigned int value)  // Output a word to a port
-{
-    asm volatile ("outw %%ax,%%dx"::"d" (port), "a" (value));
-};
-
-inline unsigned char inportb(unsigned short port)
-{
-	unsigned char ret_val;
-
-	asm volatile("inb %w1,%b0"
-		: "=a"(ret_val)
-		: "d"(port));
-	return ret_val;
-};
-
-/* ==============  */
 
 /* by DF */
 void update_cursor(int row, int col)

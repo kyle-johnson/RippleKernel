@@ -1,5 +1,5 @@
-#ifndef K_HEADER
-#define K_HEADER
+#ifndef __K_HEADER
+#define __K_HEADER
 
 #define	PIC1		0x20
 #define	PIC2		0xA0
@@ -37,7 +37,7 @@ typedef struct
 } vector_t;
 
 // IMPORTS
-// from TEST.ASM
+// from boiler.asm
 void getvect(vector_t *v, unsigned vect_num);
 void setvect(vector_t *v, unsigned vect_num);
 
@@ -59,10 +59,6 @@ typedef struct
 } regs_t;
 
 // from test.c
-inline void outportb(unsigned int port, unsigned char value);
-inline void outportw(unsigned int port, unsigned int value);
-inline unsigned char inportb(unsigned short port);
-
 void remap_pics(int pic1, int pic2);
 void unmask_irq(int irq);
 void mask_irq(int irq);
@@ -76,8 +72,5 @@ unsigned int k_load();
 
 void enable_ints();
 void disable_ints();
-
-// int 30 routine
-void int30(regs_t *regs);
 
 #endif

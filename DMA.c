@@ -1,4 +1,5 @@
-#include <k_defines.h>
+#include <data_types.h>
+#include <ports.h>
 #include <dma.h>
 
 void LoadPageAndOffset(DMA_block *blk, char *data)

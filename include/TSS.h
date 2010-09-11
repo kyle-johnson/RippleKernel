@@ -1,5 +1,5 @@
-#ifndef TSS_HEADER
-#define TSS_HEADER
+#ifndef __TSS_HEADER
+#define __TSS_HEADER
 
 #pragma pack (push, 1) // this aligns the TSSes to a byte boundary(aligning to a page boundary isn't needed)
 

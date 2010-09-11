@@ -1,5 +1,5 @@
-#ifndef FLOPPY_HEADER
-#define FLOPPY_HEADER
+#ifndef __FLOPPY_HEADER
+#define __FLOPPY_HEADER
 
 unsigned char irq6_fired;
 
