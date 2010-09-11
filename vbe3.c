@@ -5,14 +5,28 @@
 
 void *FindPMEntryBlock()
 {
-	u_long i;
+	u_long *i;
+	u_char *s;
 
-	for(i=0xF0000; i<0xF8000; i++)
+	for(s=0xC0000; s<0xC8000; s++)
 	{
-		if(_memcmp(i, "PMID", 4) == 0)
+		if(*s == 'P')
 		{
-			k_printf("\nVBE 3 PMode access point found.\n");
-		}
+			s++;
+			if(*s == 'M')
+			{
+				s++;
+				if(*s == 'I')
+				{
+					s++;
+					if(*s == 'D')
+					{
+						k_printf("\nVBE 3 PMode access point found.\n");
+						return;
+					};
+				};
+			};
+		};
 	};
 	k_printf("\nVBE 3 PMode access point not found.\n");
 };

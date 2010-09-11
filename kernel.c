@@ -60,8 +60,8 @@ k_main() // like main
 
 	setup_irqs(); // do this before messing with ANYTHING that uses IRQs
 
-	k_printf("\nSetting up the keyboard...\n");
-	setup_keyboard();
+//	k_printf("\nSetting up the keyboard...\n");
+//	setup_keyboard();
 
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
 	modify_gate_address((u_long)&irq0, 0x40, 1);
@@ -146,8 +146,6 @@ k_main() // like main
 	{
 		_plot_pixel(k, k, curr_vmode.width, 1);
 	};*/
-
-
 
 	for(;;)		// the 'idle' loop
 	{

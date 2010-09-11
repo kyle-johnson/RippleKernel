@@ -84,7 +84,7 @@ void ntostr(unsigned long n, unsigned char base, unsigned char *s)
 	{
 		j = n;
 		n /= base;	// divide num by base.
-		n *= base;	// multiply num by b to isolate the digit.
+		n *= base;	// multiply num by base to isolate the digit.
 		digit = j - n;
 		// change the numerical digit to printable ASCII value.
 		if(digit <= 9)

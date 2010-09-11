@@ -10,8 +10,6 @@ u_char raw_scancodes[255];	// 256 char buffer for scancodes
 u_char curr_scancode_pos=0;	// keep track of where we are
 u_char curr_scancode_retrieve=0;
 u_char keyboard_mutex=0;
-u_short *keyboard_isr_fired;
-
 
 void write_kbd(u_char adr, u_char data)
 {
@@ -71,7 +69,7 @@ u_char write_kbd_await_ack(u_char val)
 };
 
 /********************************************************
- Tthis identifies the current keyboard as being MF II, then checks the
+ This identifies the current keyboard as being MF II, then checks the
  current scancode set and changes it to set 2 if it is not currently set 2.
 
  NOTE: work on keyboard driver so that it doesn't require cli/sti, but
@@ -79,30 +77,31 @@ u_char write_kbd_await_ack(u_char val)
 ********************************************************/
 void setup_keyboard()
 {
-	// first, find out what kinda keyboard we have here
-//	k_printf("Detecting type of keyboard...\n");
+	volatile u_short *keyboard_isr_fired;
 
-/*	switch(kbd_get_id())
+	// first, find out what kinda keyboard we have here
+	k_printf("Detecting type of keyboard...\n");
+
+	switch(kbd_get_id())
 	{
 		case 0:
 			k_printf("Unknown keyboard... Ripple has halted.\n");
 			asm("cli");
-			asm("sti");
+			asm("hlt");
 		case 1:
 			k_printf("AT keyboard found, Ripple requires a newer keyboard... Ripple has halted.\n");
 			asm("cli");
-			asm("sti");
+			asm("hlt");
 		case 2:
 			k_printf("MF II keyboard detected.\n");
 			break;
 		default:
 			k_printf("No keyboard found, Ripple requires a keyboard... Ripple has halted.\n");
 			asm("cli");
-			asm("sti");
-	};*/
+			asm("hlt");
+	};
 
-	// disable kbd
-	write_kbd_await_ack(0xF5);
+	asm("cli");
 
 	// setup scancode set 2
 	kbd_set_scancode_set(2);
@@ -112,17 +111,27 @@ void setup_keyboard()
 	write_kbd(0x64, 0x60);
 	write_kbd(0x60, 0x07);
 
-	// enable kbd
-	write_kbd_await_ack(0xF4);
-
 	k_printf("\nWatching IRQ 1... \n");
 	keyboard_isr_fired = watch_irq(1, 0x12984C00);
 	if(keyboard_isr_fired != 0)
 	{
-		k_printf("success: 0x%x - 0x%x\n", keyboard_isr_fired, *keyboard_isr_fired);
+		*keyboard_isr_fired = 0;
+		k_printf("success, IRQ has been allocated.\n");
+		asm("sti");
+		for(;;)
+		{
+			//putc('x');
+			if(*keyboard_isr_fired >= 1)
+			{
+				k_printf("%x\n", inportb(0x60));
+				*keyboard_isr_fired -= 1;
+			};
+		};
 	} else
 	{
+		asm("sti");
 		k_printf("failure\n");
+		return;
 	};
 };
 
@@ -139,35 +148,7 @@ void store_scancode()
 
 u_char get_raw_scancode()
 {
-	volatile extern irq_watching[15];
-
-	putc('x');
-	while(irq_watching[1] == 0)
-	{
-		k_printf("%d\n", irq_watching[1]);
-		//putc('y');
-	};
-	putc('z');
-	asm("cli");asm("hlt");
-
-	while(irq_watching[1] > 0)
-	{
-		k_printf("fired\n");
-		store_scancode();
-		irq_watching[1]--;
-		//*keyboard_isr_fired--;
-	};
-
-	if(curr_scancode_retrieve < 256 && curr_scancode_retrieve < curr_scancode_pos)
-	{
-		curr_scancode_retrieve++;
-		//keyboard_mutex = 0;
-		return(raw_scancodes[curr_scancode_retrieve-1]);
-	} else
-	{
-		//keyboard_mutex = 0;
-		return(0);
-	};
+	return(0);
 };
 
 // checks to see if a char is waiting to be read from

@@ -3,11 +3,16 @@
 #include <idt.h>
 #include <irqs.h>
 
-volatile u_short irq_watching[15] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+volatile u_short irq_watching[15] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+#ifdef DEVELOPER_EDITION
+u_long irq_keys[15] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#else
 u_long irq_keys[15] = {
 0xAAFB39C0, 0x12984C00, 0x502EFB20, 0xB39D82C0, 0xFA29E000,
 0xDCAC0210, 0xAD830610, 0x28903000, 0xB33FF000, 0x103422A0,
 0xC720A290, 0xFFFFAA30, 0xD729C200, 0x00FCA320, 0x902AAF0 };
+#endif
 
 // used for un/mask_irq
 u_short irqs=0;
@@ -98,13 +103,18 @@ void release_irq(u_char irq_number, u_long key)
 	};
 };
 
+// returns number of times a IRQ has fired
+inline u_short num_time_irq_fired(u_char irq_num)
+{
+	irq_num &= 0xF; // asures we the number isn't greater than 15, faster than doing an if/then
+	return(irq_watching[irq_num]);
+};
+
 // called by the IRQ interrupt handlers
 void irq_watcher_helper(u_long irq_number)
 {
+	//putc('i');
 	irq_watching[irq_number]++;
-	k_printf("%d\n", irq_watching[1]);
-	//putc('s');
-	//inportb(0x60);
 };
 
 // Remaps the PIC, takes the interrupt numbers

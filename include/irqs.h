@@ -44,6 +44,7 @@ extern irq_watcher_15;
 void setup_irqs();
 u_long watch_irq(u_char irq_number, u_long key);
 void release_irq(u_char irq_number, u_long key);
+inline u_short num_time_irq_fired(u_char irq_num);
 void irq_watcher_helper(u_long irq_number);
 void remap_pics(u_char pic1, u_char pic2);
 void unmask_irq(u_char irq);
