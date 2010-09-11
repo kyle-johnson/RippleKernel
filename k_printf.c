@@ -1,5 +1,6 @@
-#include "k_printf.h"
-#include "putchar.h"
+#include <k_printf.h>
+#include <data_types.h>
+#include <putchar.h>
 
 void k_printf(char *message)
 {
@@ -27,7 +28,7 @@ void ntostr(u_long n, u_char base, u_char *s)
 		if(digit <= 9)
 		{
 			temp[i] = digit + '0';
-		};
+		}
 		else
 		{
 			temp[i] = digit - 0x0A + 'A';

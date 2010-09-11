@@ -1,8 +1,8 @@
 // basic putc function
 // by K.J.		5.7.2002
-#include "k_defines.h"
-#include "putchar.h"
-#include "data_types.h"
+#include <k_defines.h>
+#include <putchar.h>
+#include <data_types.h>
 
 // video memory pointer
 char *vidmem2 = (char *) 0xb8000;

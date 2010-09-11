@@ -1,5 +1,8 @@
-#include "mm.h"
-#include "data_types.h"
+#include <mm.h>
+#include <data_types.h>
+
+// stucture for tracking REAL PHYSICAL memory
+struct real_mm_tracking r_m_t;
 
 // paging startup/setup
 unsigned int paging_init()
@@ -16,11 +19,6 @@ unsigned int paging_init()
 	{
 		mem_block[i] = 0x00000000;
 	};
-	// zero the all the page tables(1000 page tables in all)
-	for(i=1024; i<(2*1024)+1024; i++)
-	{
-		mem_block[i] = 0x00000000;
-	};
 
 	// now, setup pagedir to start at the page directory
 	pagedir = mem_block;
@@ -29,15 +27,12 @@ unsigned int paging_init()
 	pagetab = pagedir + 1024;
 	pagetab2 = pagedir + (2*1024);
 
-	// point the PDEs to the PTs
+	// point the 1st PDE to the 1st PT
 	pagetab_spot = (unsigned long)pagedir + (1*1024);
-	pagedir[0] = pagetab_spot | 3; // supervisor level, read/write(011 in binary)
-
-	pagetab_spot = (unsigned long)pagedir + (2*1024);
-	pagedir[1] = pagetab_spot | 3; // supervisor level, read/write(011 in binary)
+	pagedir[0] = pagetab_spot | 3; // supervisor level, read/write, present(011 in binary)
 
 	// finish filling in PDEs for the first 1GB of address space
-	for(i=2;i<249;i++)
+	for(i=1;i<249;i++)
 	{
 		pagetab_spot = (unsigned long)pagedir + ((i+1)*1024);
 		pagedir[i] = pagetab_spot | 2; // supervisor level, read/write, not present(010 in binary)
@@ -49,29 +44,38 @@ unsigned int paging_init()
 		pagedir[i] = pagetab_spot | 6; // user level, read/write, not present(110 in binary)
 	};
 
-	// time to fill the page table
+	// time to fill in the 1st PT
 	addr = 0;
 	for(i=0; i<1024; i++)
 	{
-		pagetab[i] = addr | 3;	// supervisor level, read/write(011 in binary)
-		addr += 4096;	// next page(each page is 4kb)
-	};
-
-	// time to fill the 2nd page table
-	addr = 1024;
-	for(i=0; i<1024; i++)
-	{
-		pagetab2[i] = addr | 3;	// supervisor level, read/write(011 in binary)
+		pagetab[i] = addr | 3;	// supervisor level, read/write, present(011 in binary)
 		addr += 4096;		// next page(each page is 4kb)
 	};
 
+	// fill in the rest of the PTs for the bottom 1gb
+//	addr = 1024;
+//	for(i=0; i<254976; i++)
+//	{
+//		pagetab2[i] = addr | 2;	// supervisor level, read/write, not present(010 in binary)
+//		addr += 4096;		// next page(each page is 4kb)
+//	};
+
 	/****************************************
 	Okay, the page directory, page
-	table(s), and pages are setup.
+	tables, and pages are setup.
 	****************************************/
 	pagedir_spot = (unsigned long)pagedir;
 	// okay, set up CR3 with the address of the PD
 	write_cr3((read_cr3() & 0xFFFL) | (pagedir_spot));
+
+	r_m_t.superpage_top = 4;
+	r_m_t.page_top = (r_m_t.superpage_top * 256);
+
+	u_short mem_blah;
+	for(mem_blah=0; mem_blah<=31; mem_blah++)
+	{
+		r_m_t.page_bitmap[mem_blah] = 0xFFFFFFFF;
+	};
 
 	return(1);
 };
@@ -82,54 +86,64 @@ void enable_paging()
 	write_cr0(read_cr0() | 0x80000000L);
 };
 
+//   This function deals only with PHYSICAL memory
+//  and physical memory only
+void *real_mem_malloc()
+{
+	unsigned int i;
+
+	for(i=0; i<(r_m_t.superpage_top-1); i++)
+	{
+		if(r_m_t.superpage_bitmap[i] != 0xFFFFFFFF) // there's some free mem here
+		{
+			
+		};
+	};
+};
+
 /************************************************
     The overall design of the mm tracking
   came from Frank  Millea's Cottontail OS
   file "mem.c"
-    Though this fuction seems long, it is
-  MUCH faster than just searching a single
-  bitmap for a free page(s)(there are
-  1,028,376 individual 4k pages in the
-  4GB address space.
     This function uses 2 bitmaps... a 4mb
   "superpage" bitmap, and then one for
   the actual 4k pages.
 ************************************************/
-void *k_malloc()
-{
-	unsigned int i, a, b, c, d, t;
-
-	for(i=0; i<32; i++)
-	{
-		if(mm_tracking.superpage_usage_bitmap[i] != 0xFFFFFFFF) // a superpage in this "group" has a free 4k page(s)
-		{
-			a=i<<5; // shift i by 5 and then store the value in a
-			for(b=0; b<32; b++)
-			{
-				if(mm_tracking.superpage_count[a+b] >= i) // see if this superpage enough free 4k page(s)
-				{
-				c = (a+b) << 5;	// offset to start of 4k pages
-					for(d=0; d<32; d++)	// go through all 1024 4k pages in groups of 32
-				{
-						t = mm_tracking.page_usage_bitmap[c+d];
-						if(t == 0x00000000)	// all 32 4k pages are free
-						{
-							;
-						}
-						else if(t == 0xFFFFFFFF)	// all 32 4k pages are taken
-						{
-							;
-						}
-						else	// some of the 4k pages are used an some aren't
-						{
-							;
-						};
-					};
-				};
-			};
-		};
-	};
-};
+//void *k_malloc()
+//{
+//	unsigned int i, a, b, c, d, t;
+//
+//	for(i=0; i<32; i++)
+//	{
+//		if(mm_tracking.superpage_usage_bitmap[i] != 0xFFFFFFFF) // a superpage in this "group" has a free 4k page(s)
+//		{
+//			a=i<<5; // shift i by 5 and then store the value in a
+//			for(b=0; b<32; b++)
+//			{
+//				if(mm_tracking.superpage_count[a+b] >= i) // see if this superpage enough free 4k page(s)
+//				{
+//				c = (a+b) << 5;	// offset to start of 4k pages
+//					for(d=0; d<32; d++)	// go through all 1024 4k pages in groups of 32
+//				{
+//						t = mm_tracking.page_usage_bitmap[c+d];
+//						if(t == 0x00000000)	// all 32 4k pages are free
+//						{
+//							;
+//						}
+//						else if(t == 0xFFFFFFFF)	// all 32 4k pages are taken
+//						{
+//							;
+//						}
+//						else	// some of the 4k pages are used an some aren't
+//						{
+//							;
+//						};
+//					};
+//				};
+//			};
+//		};
+//	};
+//};
 
 // taken from Frank  Millea's Cottontail OS file, "mem.c"
 //u_long memprobe()

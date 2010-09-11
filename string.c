@@ -1,6 +1,6 @@
 // memset, memcpy, etc
 // (I have permission from Frank to use these now)
-#include "data_types.h"
+#include <data_types.h>
 
 void _memsetb(void *dest, u_char c, u_long n)
 {
@@ -86,11 +86,11 @@ u_char _strcmp(u_char *s1, u_char *s2)
 	if(len1 > len2)
 	{
 		return 1;
-	};
+	}
 	else if(len1 < len2)
 	{
 		return -1;
-	};
+	}
 	else
 	{
 		for(i=0; i<len1; i++)
@@ -98,7 +98,7 @@ u_char _strcmp(u_char *s1, u_char *s2)
 			if(s1[i] > s2[i])
 			{
 				return 1;
-			};
+			}
 			else if(s1[i] < s2[i])
 			{
 				return -1;
@@ -117,7 +117,7 @@ u_char _memcmp(void *m1, void *m2, u_long n)
 		if(_m1[i] < _m2[i])
 		{
 			return -1;
-		};
+		}
 		else if(_m1[i] > _m2[i])
 		{
 			return 1;

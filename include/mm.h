@@ -1,12 +1,19 @@
 #ifndef MM_HEADER
 #define MM_HEADER
 
-struct
-{
+struct mm_tracking {
 	unsigned long page_usage_bitmap[32768];
 	unsigned long superpage_usage_bitmap[32];
 	unsigned short superpage_count[1024];
-} mm_tracking;
+};
+
+struct real_mm_tracking {
+	unsigned long page_bitmap[32768];
+	unsigned long superpage_bitmap[32];
+	unsigned short superpage_count[1024];
+	unsigned short superpage_top;
+	unsigned page_top;
+};
 
 unsigned long total_physical_ram;
 
