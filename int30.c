@@ -1,6 +1,6 @@
 #include <k_defines.h>
 
-int30(regs_t *regs)
+void int30(regs_t *regs)
 {
 	char *vidmem = (char *) 0xb8000;
 	switch(regs->eax)

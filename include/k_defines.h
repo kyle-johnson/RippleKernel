@@ -79,6 +79,6 @@ void enable_ints();
 void disable_ints();
 
 // int 30 routine
-int30(regs_t *regs);
+void int30(regs_t *regs);
 
 #endif

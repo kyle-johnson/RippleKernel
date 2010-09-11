@@ -2,6 +2,7 @@
 #include <mm.h>
 #include <putchar.h>
 #include <data_types.h>
+#include <floppy.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -77,7 +78,13 @@ k_main() // like main
 
 	k_printf("\nNow trying to malloc one 4kb page of memory...\n");
 	a = (unsigned int*)real_mem_malloc();
-	k_printf("Got it!\n");
+	if(a!=-1)
+	{
+		k_printf("Got it!\n\n");
+		k_printf("Now trying to free the memory...\n");
+		real_mem_free(a);
+		k_printf("Memory is free!\n");
+	};
 
 
 	while(b!=5)		// the 'idle' loop
