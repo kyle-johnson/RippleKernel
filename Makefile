@@ -6,9 +6,9 @@ NASM = nasm
 NASMFLAGS = -f aout -i include
 
 LD = ld
-LDFLAGS = -T coffkrnl.ld
+LDFLAGS = -T binkrnl.ld
 
-KERN_OBJS = kernel.o boiler.o mm.o kbd_isr.o k_printf.o string.o putchar.o rwRegs.o real_time_clock.o rtc.o floppy.o tasks.o TSS.o tss-management.o mutex.o descriptor.o scheduler.o mp.o vga.o vga_utils.o ports.o exceptions.o
+KERN_OBJS = kernel.o boiler.o mm.o kbd_isr.o k_printf.o string.o putchar.o rwRegs.o real_time_clock.o rtc.o floppy.o tasks.o TSS.o tss-management.o mutex.o descriptor.o scheduler.o mp.o vga.o vga_utils.o ports.o exceptions.o exceptions_utils.o rand.o idt.o
 KERN_NAME = kernel.bin
 
 all : $(KERN_NAME)

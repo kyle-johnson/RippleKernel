@@ -9,9 +9,7 @@ TSS_START equ 0x200000
 PAGE_BIT equ 0x80000000
 
 GDT_START equ 0x500
-
-[extern _task_1]
-[extern _task_2]
+IDT_START equ 0x600
 
 [SECTION .text]
 [BITS 32]
@@ -69,24 +67,20 @@ almost_done:
 
 	mov esp,_stack			;set up the _stack
 
-; set up interrupt handlers, then load IDT register
-;	mov ecx,(idt_end - idt) >> 3		; number of exception handlers
-;	mov edi,idt
-;	mov esi,isr0
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; relocate the IDT to 0x600
+	mov esi, idt
+	mov edi, IDT_START
+	mov ecx, (idt_end-idt)
+	cld
+	rep movsd
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;do_idt:
-;	mov eax,esi			; EAX=offset of entry point
-;	mov [edi],ax			; set low 16 bits of gate offset
-;	shr eax,16
-;	mov [edi + 6],ax			; set high 16 bits of gate offset
-;	add edi,8				; 8 bytes/interrupt gate
-;	add esi,(isr1 - isr0)			; bytes/stub
-;	loop do_idt
 
-;	lidt [idt_ptr]
+	lidt [idt_ptr]
  
-	IMP k_main
-	call k_main			;like the 'main' function in C
+	EXTERN _k_main
+	call _k_main			;like the 'main' function in C
 
 	jmp $ ;loop forever
 
@@ -153,21 +147,19 @@ gdt_ptr:
 	dw gdt_end - gdt - 1
 	dd 0x500
 
-; 256 ring 0 interrupt gates
 
-;idt:
-;%rep 256
-;	dw 0				; offset 15:0
-;	dw _LINEAR_CODE_SEL		; selector
-;	db 0				; (always 0 for interrupt gates)
-;	db 8Eh				; present,ring 0,'386 interrupt gate
-;	dw 0				; offset 31:16
-;%endrep
-;idt_end:
+idt:
+%rep 100	; enough descriptors to get past the block of IRQs and then some(up to int 0x64)
+	dw 0x0
+	dw _LINEAR_CODE_SEL
+	dw 0x8E00
+	dw 0x0
+%endrep
+idt_end:
 
-;idt_ptr:
-;	dw idt_end - idt - 1			; IDT limit
-;	dd idt				; linear adr of IDT
+idt_ptr:
+	dw idt_end - idt - 1			; IDT limit
+	dd 0x600				; linear adr of IDT
 
 [global _stack]
 

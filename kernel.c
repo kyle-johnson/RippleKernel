@@ -12,7 +12,8 @@
 #include <mp.h>
 #include <vga.h>
 #include <vga_utils.h>
-#include <logo.h>
+#include <idt.h>
+#include <exceptions.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -30,15 +31,14 @@ void disable_ints()
 
 k_main() // like main
 {
-	unsigned int b=0;
-	unsigned int * a;
-	unsigned long temp2;
-	vector_t v, real_clock_vector, task_jumper, scheduler_vector; // needed for keyboard ISR and int 30 ISR
-	amount_of_ticks=0;
-	unsigned char temp;
+	asm("cli");	// turn off ints just in case
 
-	k_clear_screen();
-	k_load();
+	u_short b=0;
+	u_short * a;
+	u_long temp2;
+	u_char temp;
+	amount_of_ticks=0;
+
 	k_clear_screen();
 
 	k_printf("Right now the kernel is loaded at 1MB physical.\n\n");
@@ -46,6 +46,30 @@ k_main() // like main
 	k_printf("Remapping the PIC...\n");
 	remap_pics(0x40, 0x48);	// irq 0 40h irq 8 48h
 	k_printf("PIC remapped starting at 40 hex.\n");
+
+	k_printf("\nNow setting up the exception handlers...\n");
+	modify_gate_address(&isr0, 0);
+	modify_gate_address(&isr1, 1);
+	modify_gate_address(&isr2, 2);
+	modify_gate_address(&isr3, 3);
+	modify_gate_address(&isr4, 4);
+	modify_gate_address(&isr5, 5);
+	modify_gate_address(&isr6, 6);
+	modify_gate_address(&isr7, 7);
+	modify_gate_address(&isr8, 8);
+	modify_gate_address(&isr9, 9);
+	modify_gate_address(&isr10, 10);
+	modify_gate_address(&isr11, 11);
+	modify_gate_address(&isr12, 12);
+	modify_gate_address(&isr13, 13);
+	modify_gate_address(&isr14, 14);
+	modify_gate_address(&isr15, 15);
+	modify_gate_address(&isr16, 16);
+	k_printf("Exception handlers setup.\n");
+
+	k_printf("\nInstalling keyboard handler...\n");
+	modify_gate_address(&kbd_isr, 0x41);
+	k_printf("Keyboard handler installed.\n");
 
 	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
 	paging_init();
@@ -56,7 +80,7 @@ k_main() // like main
 	k_printf("Paging enabled!\n");
 
 	k_printf("\nNow trying to malloc one 4kb page of memory...\n");
-	a = (unsigned int*)real_mem_malloc();
+	a = (u_short*)real_mem_malloc();
 	if(a!=-1)
 	{
 		k_printf("Got it!\n\n");
@@ -65,14 +89,13 @@ k_main() // like main
 		k_printf("Memory is free!\n\n");
 	};
 
-	k_printf("Setting up the real time clock handler..\n");
-	disable_ints(); // disable interrupts while changing an interrupt handler
+//	k_printf("Setting up the real time clock handler..\n");
 
 //	outportb(0x70, 0x0A);
 //	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
 
 	k_printf("Now attempting to find floppy drives...\n");
-//	inti_floppy();
+	inti_floppy();
 
 //	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
 
@@ -86,22 +109,22 @@ k_main() // like main
 //	};
 
 
+	is_mp_present();
+
 	k_printf("switching to 320x240 with 256 colors...\n");
 
 	struct Vmode curr_vmode;
 	SetModeMODE_X(&curr_vmode);
 	UnchainedClear(0, curr_vmode.width_bytes);
 
-	u_short x, z, k=0;
+	u_short k;
 
-	for(z=0; z<13; z++)
+	for(k=0; k<300; k++)
 	{
-		for(x=0; x<19; x++)
-		{
-			_plot_pixel(x, z, curr_vmode.width, logo[k]);
-			k++;
-		};
+		_plot_pixel(k, k, curr_vmode.width, 1);
 	};
+
+
 
 	for(;;)		// the 'idle' loop
 	{
@@ -119,20 +142,6 @@ void k_clear_screen() // clear the entire text screen
 		vidmem[i]=WHITE_TXT;
 		i++;
 	};
-};
-
-unsigned int k_load() // loads whatever has to be loaded
-{
-	unsigned int i=(80*2);
-	while(i<(2*80*2)) // shows a "loading bar"
-	{
-		vidmem[i]=0xb2;
-		i++;
-		vidmem[i]=WHITE_TXT;
-		i++;
-	};
-
-	return(1); // no problems
 };
 
 /* by DF */

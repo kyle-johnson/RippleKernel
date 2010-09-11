@@ -44,25 +44,21 @@ D_CONFORM	EQU	 400h	;Conforming (Code segments only)
 D_BIG		EQU	  40h	;Default to 32 bit mode (USE32)
 D_BIG_LIM	EQU	  80h	;Limit is in 4K units
 
-%define w_a_n_p_b  ;work_around_nasm_prepend_bug
-
 %macro desc 3
-w_a_n_p_b
-%if (%3) & (~(%3)>>2) & 0x400   ;Gate
-	dw	%1
-	dw	%2
-	dw	(%3)+D_PRESENT
-	dw	(%1) >> 16
-%else                           ;Not a gate
 	dw	%2
 	dw	%1
 	db	(%1) >> 16
 	db	((%3)+D_PRESENT) >> 8
 	db	(%3) + ((%2) >> 16)
 	db	(%1) >> 24
-%endif
 %endmacro
 
+%macro mk_gate 2
+	dw %1
+	dw %2
+	dw D_INT+D_PRESENT
+	dw (%1) >> 16
+%endmacro
 ;-----------------------------------------------------------------------------
 ;
 ;  A gate is identified as any descriptor whose flags has bit 10 set and 

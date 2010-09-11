@@ -3,7 +3,7 @@
 #include <ports.h>
 #include <real_time_clock.h>
 
-void real_time_clock_ISR(regs_t *regs)
+void real_time_clock_ISR()
 {
 	asm("cli");
 	amount_of_ticks++;

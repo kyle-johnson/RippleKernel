@@ -29,13 +29,6 @@
 #define UCHAR unsigned char
 #define USHORT unsigned short
 
-/* the code for setvect() and getvect() in
-TEST.ASM depends on the layout of this structure */
-typedef struct
-{
-	unsigned access_byte, eip;
-} vector_t;
-
 // needed for IRQ enableing
 USHORT irqs;
 
@@ -60,7 +53,6 @@ void mask_irq(int irq);
 
 void k_clear_screen();
 void update_cursor(int row, int col);
-unsigned int k_load();
 
 void enable_ints();
 void disable_ints();

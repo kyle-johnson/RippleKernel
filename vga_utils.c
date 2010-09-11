@@ -41,7 +41,7 @@ void _plot_pixel(u_short x, u_short y, u_short screen_width, u_char color)
 	asm("movl $0xA0000, %edi");
 	asm("addl %eax, %edi");
 	asm("movb %b0, %%al" : : "m" (color));
-	asm("movl %eax, (%edi)");		// all right, display it!
+	asm("movb %al, (%edi)");		// all right, display it!
 	asm("popl %edi");
 	asm("popl %ebx");
 	asm("popl %eax");
