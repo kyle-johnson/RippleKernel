@@ -4,6 +4,8 @@
 #include <k_printf.h>
 #include <mp.h>
 
+mp_floating_t *MP_fp_t;
+
 // returns 1 if it is, 0 if it isn't
 u_char is_mp_present()
 {
@@ -12,8 +14,25 @@ u_char is_mp_present()
 	{
 		if(_memcmp(i, "_MP_", 4) == 0) // we got multiprocessing!!!
 		{
-			k_printf("YEAH! Multiprocessing sig found @ 0x%x\n", i);
-			return 1;
+			MP_fp_t = i;
+			if(MP_fp_t->length == 1)
+			{
+				if(MP_fp_t->specification == 1 || MP_fp_t->specification == 4)
+				{
+					if(MP_fp_t->MPConfig_p != 0)
+					{
+						k_printf("YEAH! Multiprocessing sig found @ 0x%x\n", i);
+						return 1;
+					} else
+					{
+						k_printf("no MP config table.\n");
+						return 0;
+					};
+				} else
+				{
+					k_printf("wrong MP specification.\n");
+				};
+			};
 		};
 	};
 	k_printf("No multiprocessing sig found.\n");

@@ -11,8 +11,25 @@
 
 gate_desc *idt_ptr = (gate_desc *) 0x600;
 
-void modify_gate_address(u_long ptr_to_address, u_char int_num)
+void modify_gate_address(u_long ptr_to_address, u_char int_num, u_char on_off)
 {
 	idt_ptr[int_num].addr1 = (u_short)ptr_to_address;
 	idt_ptr[int_num].addr2 = (ptr_to_address >> 16);
+	if(on_off == 1)
+	{
+		idt_ptr[int_num].settings |= 0x8000;
+	} else
+	{
+		idt_ptr[int_num].settings &= 0x7FFF;
+	};
+};
+
+void enable_gate(u_long int_num)
+{
+	idt_ptr[int_num].settings |= 0x8000;
+};
+
+void disable_gate(u_long int_num)
+{
+	idt_ptr[int_num].settings &= 0x7FFF;
 };

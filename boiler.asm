@@ -158,7 +158,7 @@ idt:
 %rep 100	; enough descriptors to get past the block of IRQs and then some(up to int 0x64)
 	dw 0x0
 	dw _LINEAR_CODE_SEL
-	dw 0x8E00
+	dw 0xE00
 	dw 0x0
 %endrep
 idt_end:

@@ -3,5 +3,6 @@
 
 void task_1();
 void task_2();
+void kbd_input_test();
 
 #endif

@@ -19,22 +19,13 @@
 #include <tasks.h>
 #include <scheduler.h>
 #include <phys_mm.h>
+#include <keyboard.h>
+#include <irqs.h>
 #include "include\malloc.h"
 
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
-
-void kbd_isr();
-
-void enable_ints()
-{
-	asm("sti");
-};
-void disable_ints()
-{
-	asm("cli");
-};
 
 k_main() // like main
 {
@@ -55,31 +46,31 @@ k_main() // like main
 	k_printf("PIC remapped starting at 40 hex.\n");
 
 	k_printf("\nNow setting up the exception handlers...\n");
-	modify_gate_address((u_long)&isr0, 0);
-	modify_gate_address((u_long)&isr1, 1);
-	modify_gate_address((u_long)&isr2, 2);
-	modify_gate_address((u_long)&isr3, 3);
-	modify_gate_address((u_long)&isr4, 4);
-	modify_gate_address((u_long)&isr5, 5);
-	modify_gate_address((u_long)&isr6, 6);
-	modify_gate_address((u_long)&isr7, 7);
-	modify_gate_address((u_long)&isr8, 8);
-	modify_gate_address((u_long)&isr9, 9);
-	modify_gate_address((u_long)&isr10, 10);
-	modify_gate_address((u_long)&isr11, 11);
-	modify_gate_address((u_long)&isr12, 12);
-	modify_gate_address((u_long)&isr13, 13);
-	modify_gate_address((u_long)&isr14, 14);
-	modify_gate_address((u_long)&isr16, 16);
+	modify_gate_address((u_long)&isr0, 0, 1);
+	modify_gate_address((u_long)&isr1, 1, 1);
+	modify_gate_address((u_long)&isr2, 2, 1);
+	modify_gate_address((u_long)&isr3, 3, 1);
+	modify_gate_address((u_long)&isr4, 4, 1);
+	modify_gate_address((u_long)&isr5, 5, 1);
+	modify_gate_address((u_long)&isr6, 6, 1);
+	modify_gate_address((u_long)&isr7, 7, 1);
+	modify_gate_address((u_long)&isr8, 8, 1);
+	modify_gate_address((u_long)&isr9, 9, 1);
+	modify_gate_address((u_long)&isr10, 10, 1);
+	modify_gate_address((u_long)&isr11, 11, 1);
+	modify_gate_address((u_long)&isr12, 12, 1);
+	modify_gate_address((u_long)&isr13, 13, 1);
+	modify_gate_address((u_long)&isr14, 14, 1);
+	modify_gate_address((u_long)&isr16, 16, 1);
 	k_printf("Exception handlers setup.\n");
 
-	k_printf("\nInstalling keyboard handler...\n");
-	modify_gate_address((u_long)&kbd_isr, 0x41);
-	k_printf("Keyboard handler installed.\n");
+	k_printf("\nSetting up the keyboard...\n");
+	mask_irq(1);
+	setup_keyboard();
 
 	mask_irq(0);
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
-	modify_gate_address((u_long)&irq0, 0x40);
+	modify_gate_address((u_long)&irq0, 0x40, 1);
 	k_printf("IRQ0 handler installed.\n");
 
 //	k_printf("Setting up the real time clock handler..\n");
@@ -140,13 +131,12 @@ k_main() // like main
 	free(test);
 	k_printf("memory freed!\n");
 
+
 	k_printf("\nSetting up 3 tasks...\n");
 	make_threads();
 
 	k_printf("\nSwitching tasks...\n");
-//	unmask_irq(0);
-//	asm("sti");
-//	asm("int $0x40");
+
 	cool_down_thread();
 
 /*
@@ -183,53 +173,14 @@ void k_clear_screen() // clear the entire text screen
 	};
 };
 
-/* by DF */
+// coded by DF
 void update_cursor(int row, int col)
 {
-	USHORT	position=(row*80) + col;
+	u_short	position=(row*80) + col;
 	// cursor LOW port to vga INDEX register
 	outportb(0x3D4, 0x0F);
-	outportb(0x3D5, (UCHAR)(position&0xFF));
+	outportb(0x3D5, (u_char)(position&0xFF));
 	// cursor HIGH port to vga INDEX register
 	outportb(0x3D4, 0x0E);
-	outportb(0x3D5, (UCHAR)((position>>8)&0xFF));
-};
-
-void remap_pics(int pic1, int pic2)
-{
-	UCHAR	a1, a2;
-
-	a1=inportb(PIC1_DATA);
-	a2=inportb(PIC2_DATA);
-
-	outportb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);
-	outportb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
-	outportb(PIC1_DATA, pic1);
-	outportb(PIC2_DATA, pic2);
-	outportb(PIC1_DATA, 4);
-	outportb(PIC2_DATA, 2);
-	outportb(PIC1_DATA, ICW4_8086);
-	outportb(PIC2_DATA, ICW4_8086);
-	
-	outportb(PIC1_DATA, a1);
-	outportb(PIC2_DATA, a2);
-};
-
-void unmask_irq(int irq)
-{
-	irqs&=~(1<<irq);
-	    if(irq < 8)
-        outportb(PIC1_DATA, irqs&0xFF);
-    else
-        outportb(PIC2_DATA, irqs>>8);
-};
-
-void mask_irq(int irq)
-{
-	irqs|=(1<<irq);
-
-    if(irq < 8)
-        outportb(PIC1_DATA, irqs&0xFF);
-    else
-        outportb(PIC2_DATA, irqs>>8);
+	outportb(0x3D5, (u_char)((position>>8)&0xFF));
 };

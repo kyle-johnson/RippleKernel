@@ -11,10 +11,9 @@ typedef struct {
 	u_char sleeping;		// 0 = no, 1 = yes
 	u_long sleep_ticks;		// the process can't sleep for more than 4,194,303 seconds... should be plenty :)
 	u_long stack[255];		// stack for this thread(1024 bytes long)
-	u_long first_run;
 } __attribute__((packed)) thread_struct;
 
-void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_long ds, u_long cs, u_long ss);
+void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_long ds, u_long cs, u_long ss, u_long num_parms, ...);
 void cool_down_thread();
 
 #endif

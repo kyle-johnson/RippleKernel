@@ -1,0 +1,177 @@
+/*
+	ext_ascii.h
+	-----------
+	Extended ASCII support
+	by: Frank Millea, June 3, 2001.
+*/
+
+#define CTRL_AT 0x00
+#define CTRL_A 0x01
+#define CTRL_B 0x02
+#define CTRL_C 0x03
+#define CTRL_D 0x04
+#define CTRL_E 0x05
+#define CTRL_F 0x06
+#define CTRL_G 0x07
+#define CTRL_H 0x08
+#define CTRL_I 0x09
+#define CTRL_J 0x0A
+#define CTRL_K 0x0B
+#define CTRL_L 0x0C
+#define CTRL_M 0x0D
+#define CTRL_N 0x0E
+#define CTRL_O 0x0F
+#define CTRL_P 0x10
+#define CTRL_Q 0x11
+#define CTRL_R 0x12
+#define CTRL_S 0x13
+#define CTRL_T 0x14
+#define CTRL_U 0x15
+#define CTRL_V 0x16
+#define CTRL_W 0x17
+#define CTRL_X 0x18
+#define CTRL_Y 0x19
+#define CTRL_Z 0x1A
+#define CTRL_LBRACK 0x1B
+#define CTRL_BACKSLASH 0x1C
+#define CTRL_RBRACK 0x1D
+#define CTRL_CARET 0x1E
+#define CTRL_USCORE 0x1F
+
+#define EXT_F1 0x3B00
+#define EXT_F2 0x3C00
+#define EXT_F3 0x3D00
+#define EXT_F4 0x3E00
+#define EXT_F5 0x3F00
+#define EXT_F6 0x4000
+#define EXT_F7 0x4100
+#define EXT_F8 0x4200
+#define EXT_F9 0x4300
+#define EXT_F10 0x4400
+#define EXT_F11 0x8500
+#define EXT_F12 0x8600
+
+#define EXT_SHIFT_F1 0x5400
+#define EXT_SHIFT_F2 0x5500
+#define EXT_SHIFT_F3 0x5600
+#define EXT_SHIFT_F4 0x5700
+#define EXT_SHIFT_F5 0x5800
+#define EXT_SHIFT_F6 0x5900
+#define EXT_SHIFT_F7 0x5A00
+#define EXT_SHIFT_F8 0x5B00
+#define EXT_SHIFT_F9 0x5C00
+#define EXT_SHIFT_F10 0x5D00
+#define EXT_SHIFT_F11 0x8700
+#define EXT_SHIFT_F12 0x8800
+
+#define EXT_CTRL_F1 0x5E00
+#define EXT_CTRL_F2 0x5F00
+#define EXT_CTRL_F3 0x6000
+#define EXT_CTRL_F4 0x6100
+#define EXT_CTRL_F5 0x6200
+#define EXT_CTRL_F6 0x6300
+#define EXT_CTRL_F7 0x6400
+#define EXT_CTRL_F8 0x6500
+#define EXT_CTRL_F9 0x6600
+#define EXT_CTRL_F10 0x6700
+#define EXT_CTRL_F11 0x8900
+#define EXT_CTRL_F12 0x8A00
+
+#define EXT_ALT_F1 0x6800
+#define EXT_ALT_F2 0x6900
+#define EXT_ALT_F3 0x6A00
+#define EXT_ALT_F4 0x6B00
+#define EXT_ALT_F5 0x6C00
+#define EXT_ALT_F6 0x6D00
+#define EXT_ALT_F7 0x6E00
+#define EXT_ALT_F8 0x6F00
+#define EXT_ALT_F9 0x7000
+#define EXT_ALT_F10 0x7100
+#define EXT_ALT_F11 0x8B00
+#define EXT_ALT_F12 0x8C00
+
+#define EXT_ALT_A 0x1E00
+#define EXT_ALT_B 0x3000
+#define EXT_ALT_C 0x2E00
+#define EXT_ALT_D 0x2000
+#define EXT_ALT_E 0x1200
+#define EXT_ALT_F 0x2100
+#define EXT_ALT_G 0x2200
+#define EXT_ALT_H 0x2300
+#define EXT_ALT_I 0x1700
+#define EXT_ALT_J 0x2400
+#define EXT_ALT_K 0x2500
+#define EXT_ALT_L 0x2600
+#define EXT_ALT_M 0x3200
+#define EXT_ALT_N 0x3100
+#define EXT_ALT_O 0x1800
+#define EXT_ALT_P 0x1900
+#define EXT_ALT_Q 0x1000
+#define EXT_ALT_R 0x1300
+#define EXT_ALT_S 0x1F00
+#define EXT_ALT_T 0x1400
+#define EXT_ALT_U 0x1600
+#define EXT_ALT_V 0x2F00
+#define EXT_ALT_W 0x1100
+#define EXT_ALT_X 0x2D00
+#define EXT_ALT_Y 0x1500
+#define EXT_ALT_Z 0x2C00
+
+#define EXT_ALT_0 0x8100
+#define EXT_ALT_1 0x7800
+#define EXT_ALT_2 0x7900
+#define EXT_ALT_3 0x7A00
+#define EXT_ALT_4 0x7B00
+#define EXT_ALT_5 0x7C00
+#define EXT_ALT_6 0x7D00
+#define EXT_ALT_7 0x7E00
+#define EXT_ALT_8 0x7F00
+#define EXT_ALT_9 0x8000
+#define EXT_ALT_MINUS 0x8200
+#define EXT_ALT_EQUALS 0x8300
+
+#define EXT_NUL 0x0300
+#define EXT_SHIFT_TAB 0x0F00
+#define EXT_INS 0x5200
+#define EXT_DEL 0x5300
+#define EXT_PRTSCR 0x7200
+#define EXT_DOWN 0x5000
+#define EXT_LEFT 0x4B00
+#define EXT_RIGHT 0x4D00
+#define EXT_UP 0x4800
+#define EXT_END 0x4F00
+#define EXT_HOME 0x4700
+#define EXT_PGDN 0x5100
+#define EXT_PGUP 0x4900
+
+#define EXT_CTRL_LEFT 0x7300
+#define EXT_CTRL_RIGHT 0x7400
+#define EXT_CTRL_END 0x7500
+#define EXT_CTRL_HOME 0x7700
+#define EXT_CTRL_PGDN 0x7600
+#define EXT_CTRL_PGUP 0x8400
+#define EXT_CTRL_TAB 0x9400
+
+#define EXT_ALT_LBRACK 0x1A00
+#define EXT_ALT_RBRACK 0x1B00
+#define EXT_ALT_SEMICOL 0x2700
+#define EXT_ALT_RAPOST 0x2800
+#define EXT_ALT_LAPOST 0x2900
+#define EXT_ALT_BACKSLASH 0x2B00
+#define EXT_ALT_COMMA 0x3300
+#define EXT_ALT_PERIOD 0x3400
+#define EXT_ALT_SLASH 0x3500
+#define EXT_ALT_BKSP 0x0E00
+#define EXT_ALT_ENTER 0x1C00
+#define EXT_ALT_ESC 0x0100
+#define EXT_ALT_TAB 0xA500
+#define EXT_ALT_UP 0x9800
+#define EXT_ALT_DOWN 0xA000
+#define EXT_ALT_LEFT 0x9B00
+#define EXT_ALT_RIGHT 0x9D00
+#define EXT_ALT_DEL 0xA300
+#define EXT_ALT_END 0x9F00
+#define EXT_ALT_HOME 0x9700
+#define EXT_ALT_INS 0xA200
+#define EXT_ALT_PGUP 0x9900
+#define EXT_ALT_PGDN 0xA100
