@@ -18,7 +18,16 @@ void k_printf(char *message, ...)
 	{
 		if(message[i] == '%')
 		{
-			is_percent_sign = 1;
+			if(is_percent_sign == 0)
+			{
+				is_percent_sign = 1;
+			}
+			else // print a percent sign
+			{
+				tmp = _strlen(total_message);
+				total_message[tmp] = message[i];
+				total_message[tmp +1] = '\0';
+			};
 		}
 		else if(is_percent_sign != 1)
 		{
@@ -36,7 +45,7 @@ void k_printf(char *message, ...)
 				case 'd': // to display a number in decimal(base 10)
 					ntostr(*parm, 10, &total_message[_strlen(total_message)]);
 					break;
-				case 'c': // to display just one char(DOESN'T WORK)
+				case 'c': // to display just one char
 					tmp = _strlen(total_message);
 					total_message[tmp] = (unsigned char)*parm;
 					total_message[tmp + 1] = '\0';
@@ -48,11 +57,8 @@ void k_printf(char *message, ...)
 					ntostr(*parm, 8, &total_message[_strlen(total_message)]);
 					break;
 			};
-			if(is_percent_sign != 0)
-			{
-				(unsigned long)parm += 4;
-				is_percent_sign = 0;
-			};
+			(unsigned long)parm += 4;
+			is_percent_sign = 0;
 		};
 	};
 	i = 0;

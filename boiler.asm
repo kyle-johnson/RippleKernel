@@ -4,6 +4,9 @@
 %define UNDERBARS
 %include "asm.inc"
 %include "gdtnasm.inc"
+
+TSS_START equ 0x200000
+
 PAGE_BIT equ 0x80000000
 
 [extern _task_1]
@@ -38,13 +41,13 @@ ds_ok:
 ; stop using bootloader GDT, and load new GDT
 	lgdt [gdt_ptr]
 
-	mov ax,LINEAR_DATA_SEL
+	mov ax,_LINEAR_DATA_SEL
 	mov ds,ax
 	mov es,ax
 	mov ss,ax
 	mov fs,ax
 	mov gs,ax
-	jmp LINEAR_CODE_SEL:almost_done
+	jmp _LINEAR_CODE_SEL:almost_done
 
 almost_done:
 
@@ -55,7 +58,7 @@ almost_done:
 	xor eax,eax
 	rep stosb
 
-	mov esp,stack			;set up the stack
+	mov esp,_stack			;set up the _stack
 
 ; set up interrupt handlers, then load IDT register
 	mov ecx,(idt_end - idt) >> 3		; number of exception handlers
@@ -120,7 +123,7 @@ isr%1:
 	push es				; ( 8)
 	push ds				; ( 9)
 	pusha				; (10) push GP registers
-		mov ax,LINEAR_DATA_SEL	; (11) put known-good values...
+		mov ax,_LINEAR_DATA_SEL	; (11) put known-good values...
 		mov ds,eax		; (15) ...in segment registers
 		mov es,eax		; (17)
 		mov fs,eax		; (19)
@@ -146,7 +149,7 @@ isr%1:
 	push es				; ( 8)
 	push ds				; ( 9)
 	pusha				; (10) push GP registers
-		mov ax,LINEAR_DATA_SEL	; (11) put known-good values...
+		mov ax,_LINEAR_DATA_SEL	; (11) put known-good values...
 		mov ds,eax		; (15) ...in segment registers
 		mov es,eax		; (17)
 		mov fs,eax		; (19)
@@ -273,7 +276,7 @@ EXP setvect
 	INTR 9		; coproc segment overrun (abort; 386/486SX only)
 	INTR_EC 0Ah	; bad TSS (fault w/ error code)
 	INTR_EC 0Bh	; segment not present (fault w/ error code)
-	INTR_EC 0Ch	; stack fault (fault w/ error code)
+	INTR_EC 0Ch	; _stack fault (fault w/ error code)
 	INTR_EC 0Dh	; GPF (fault w/ error code)
 	INTR_EC 0Eh	; page fault
 	INTR 0Fh	; reserved
@@ -333,71 +336,7 @@ EXP setvect
 ds_magic:		;this is so we know if our data segment was linked corectly
 	dd DS_MAGIC	; ^
 
-[global _tss0_begin]
-TSS0_START	equ	$+1
-_tss0_begin:		;empty, this is just so that we can "get the ball rolling"
-	dw 0		; back link
-	dd 0		; esp0
-	dw 0		; ss0
-	dd 0		; esp1
-	dw 0		; ss1
-	dd 0		; esp2
-	dw 0		; ss2
-	dd 0		; cr3
-	dd 0		; eip
-	dd 0		; eflags
-	dd 0		; eax
-	dd 0		; ecx
-	dd 0		; edx
-	dd 0		; ebx
-	dd 0		; esp
-	dd 0		; ebp
-	dd 0		; esi
-	dd 0		; edi
-	dw 0		; es
-	dw 0		; cs
-	dw 0		; ss
-	dw 0		; ds
-	dw 0		; fs
-	dw 0		; gs
-	dw 0		; ldt
-	dw 0		; trace/trap
-	dw 0		; i/o bitmap address
-
-[global _tss1_begin]
-TSS1_START	equ	$+1
-_tss1_begin:
-	dw 0			; back link
-	dd 0			; esp0
-	dw 0			; ss0
-	dd 0			; esp1
-	dw 0			; ss1
-	dd 0			; esp2
-	dw 0			; ss2
-	dd 0x9C000		; cr3
-	dd _task_1		; eip
-	dd 0			; eflags
-	dd 0			; eax
-	dd 0			; ecx
-	dd 0			; edx
-	dd 0			; ebx
-	dd stack			; esp
-	dd 0			; ebp
-	dd 0			; esi
-	dd 0			; edi
-	dw 0			; es
-	dw LINEAR_CODE_SEL	; cs
-	dw LINEAR_DATA_SEL	; ss
-	dw 0			; ds
-	dw 0			; fs
-	dw 0			; gs
-	dw 0			; ldt
-	dw 0			; trace/trap
-	dw 0			; i/o bitmap address
-
-[global _tss2_begin]
-TSS2_START	equ	$+1
-_tss2_begin:
+tss2_begin:
 	dw 0			; back link
 	dd 0			; esp0
 	dw 0			; ss0
@@ -412,13 +351,13 @@ _tss2_begin:
 	dd 0			; ecx
 	dd 0			; edx
 	dd 0			; ebx
-	dd stack			; esp
+	dd _stack			; esp
 	dd 0			; ebp
 	dd 0			; esi
 	dd 0			; edi
 	dw 0			; es
-	dw LINEAR_CODE_SEL	; cs
-	dw LINEAR_DATA_SEL	; ss
+	dw _LINEAR_CODE_SEL	; cs
+	dw _LINEAR_DATA_SEL	; ss
 	dw 0			; ds
 	dw 0			; fs
 	dw 0			; gs
@@ -428,7 +367,7 @@ _tss2_begin:
 tss2_end:
 
 
-TSS_SIZE	equ	(tss2_end - _tss2_begin)
+TSS_SIZE	equ	(tss2_end - tss2_begin)
 
 gdt:			;our descriptors
 ; NULL descriptor
@@ -446,30 +385,31 @@ gdt:			;our descriptors
 	db 0
 	db 0
 	db 0
-
-LINEAR_DATA_SEL	equ	$-gdt
+[global _LINEAR_DATA_SEL]
+_LINEAR_DATA_SEL	equ	$-gdt
 	dw 0FFFFh
 	dw 0
 	db 0
 	db 92h		; present, ring 0, data, expand-up, writable
 	db 0CFh		; page-granular (4 gig limit), 32-bit
 	db 0
-
-LINEAR_CODE_SEL	equ	$-gdt
+[global _LINEAR_CODE_SEL]
+_LINEAR_CODE_SEL	equ	$-gdt
 	dw 0FFFFh
 	dw 0
 	db 0
 	db 9Ah		; present,ring 0,code,non-conforming,readable
 	db 0CFh		; page-granular (4 gig limit), 32-bit
 	db 0
-;TSS_ENTRY_0		equ	$-gdt
-;	desc TSS0_START, TSS_SIZE, D_TSS	
-
-;TSS_ENTRY_1		equ	$-gdt
-;	desc TSS1_START, TSS_SIZE, D_TSS
-
-;TSS_ENTRY_2		equ	$-gdt
-;	desc TSS2_START, TSS_SIZE, D_TSS
+[global _TSS_ENTRY_0]
+_TSS_ENTRY_0		equ	$-gdt
+	desc TSS_START, TSS_SIZE, D_TSS	
+[global _TSS_ENTRY_1]
+_TSS_ENTRY_1		equ	$-gdt
+	desc TSS_START+TSS_SIZE, TSS_SIZE, D_TSS
+[global _TSS_ENTRY_2]
+_TSS_ENTRY_2		equ	$-gdt
+	desc TSS_START+(TSS_SIZE*2), TSS_SIZE, D_TSS
 
 gdt_end:
 
@@ -482,7 +422,7 @@ gdt_ptr:
 idt:
 %rep 256
 	dw 0				; offset 15:0
-	dw LINEAR_CODE_SEL		; selector
+	dw _LINEAR_CODE_SEL		; selector
 	db 0				; (always 0 for interrupt gates)
 	db 8Eh				; present,ring 0,'386 interrupt gate
 	dw 0				; offset 31:16
@@ -493,7 +433,9 @@ idt_ptr:
 	dw idt_end - idt - 1			; IDT limit
 	dd idt				; linear adr of IDT
 
+[global _stack]
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [SECTION .bss]
 	resb 1024
-	stack:				;the stack
+	_stack:				;the _stack

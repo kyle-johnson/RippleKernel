@@ -42,3 +42,24 @@ _read_cr2:
 	mov edx, eax
 	shr edx, 16	; the return value is CR2
 	retn
+
+[global _read_cs]
+_read_cs:
+	mov eax, cs
+	mov edx, eax
+	shr edx, 16	; the return value is cs
+	retn
+
+[global _read_ds]
+_read_ds:
+	mov eax, ds
+	mov edx, eax
+	shr edx, 16	; the return value is ds
+	retn
+
+[global _read_esp]
+_read_esp:
+	mov eax, esp
+	mov edx, eax
+	shr edx, 16	; the return value is esp
+	retn

@@ -137,6 +137,12 @@ k_main() // like main
 	get_time_str(0, &hours, &minutes, &seconds);
 	k_printf("%s:%s:%s", hours, minutes, seconds);
 
+	k_printf("\ndo you see a percent sign below this line?\n%%");
+
+	setup_up_tsses();
+	load_first_ltr();
+	jmp_tss_1();
+
 	while(b!=5)		// the 'idle' loop
 	{
 		asm("hlt");
