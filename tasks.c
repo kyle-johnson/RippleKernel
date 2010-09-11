@@ -1,9 +1,8 @@
 #include <data_types.h>
-#include <k_defines.h>
-#include <tss.h>
+#include <putchar.h>
 #include <tasks.h>
 
-task_1()
+void task_1()
 {
 	for(;;)
 	{
@@ -11,7 +10,7 @@ task_1()
 	};
 };
 
-task_2()
+void task_2()
 {
 	for(;;)
 	{

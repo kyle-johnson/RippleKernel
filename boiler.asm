@@ -52,6 +52,7 @@ ds_ok:
 	mov ds,ax
 	mov es,ax
 	mov ss,ax
+	mov ax, 0x0
 	mov fs,ax
 	mov gs,ax
 	jmp _LINEAR_CODE_SEL:almost_done

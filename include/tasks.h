@@ -1,7 +1,7 @@
 #ifndef __TASKS_HEADER
 #define __TASKS_HEADER
 
-task_1();
-task_2();
+void task_1();
+void task_2();
 
 #endif

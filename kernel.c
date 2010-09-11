@@ -15,6 +15,9 @@
 #include <idt.h>
 #include <exceptions.h>
 #include <cpu.h>
+#include <processes.h>
+#include <threads.h>
+#include <tasks.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -71,6 +74,7 @@ k_main() // like main
 	modify_gate_address(&kbd_isr, 0x41);
 	k_printf("Keyboard handler installed.\n");
 
+	mask_irq(0);
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
 	modify_gate_address(&irq0, 0x40);
 	k_printf("IRQ0 handler installed.\n");
@@ -117,8 +121,14 @@ k_main() // like main
 
 	identify_cpu();
 
-	unmask_irq(0);
+
+
+	k_printf("CS: %x", read_cs());
+
+	k_printf("\nSwitching tasks...\n");
 	asm("sti");
+	asm("int $0x40");
+
 
 	/*k_printf("switching to 320x240 with 256 colors...\n");
 
