@@ -37,13 +37,22 @@ u_long virt_mem_inti()
 
 	return page_dir;
 };
-/*
-void fault()
-{
-	u_long fault_address;
 
-	asm("pushl %eax");
-	asm("movl %cr2, %eax");
-	asm("movl %%eax, %w0" : "=m" (fault_address));
-	asm("popl %eax");
-}; */
+// allocates 1 page of memory and returns that page's address(kernel use only)
+void *kpage_alloc()
+{
+	u_long i;
+
+	for(i=0; i<32767; i++)
+	{
+		if(abc.page_bitmap[i] != 0xFFFFFFFF)
+		{
+			if(abc.page_bitmap[i] == 0x0)
+			{
+				abc.page_bitmap[i] = 1;
+				return(i << 12);
+			};
+			
+		};
+	};
+};

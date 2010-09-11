@@ -125,7 +125,7 @@ k_main() // like main
 //	asm("sti");
 //	asm("int $0x40");
 
-	/*k_printf("switching to 320x240 with 256 colors...\n");
+	k_printf("switching to 320x240 with 256 colors...\n");
 
 	struct Vmode curr_vmode;
 	SetModeMODE_X(&curr_vmode);
@@ -136,7 +136,7 @@ k_main() // like main
 	for(k=0; k<200; k++)
 	{
 		_plot_pixel(k, k, curr_vmode.width, 1);
-	};*/
+	};
 
 
 
