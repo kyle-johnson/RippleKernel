@@ -237,7 +237,7 @@ _isr14: ; page fault... this one is IMPORTANT!
 	pop es
 	pop fs
 	pop gs
-	add esp, 8	; drop exception number and error code
+	add esp, 4	; drop error code
 	iret
 
 [global _isr16]

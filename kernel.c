@@ -125,8 +125,9 @@ k_main() // like main
 	k_printf("Hold your breath, enabling paging...\n");
 	enable_paging();
 	k_printf("YEAH!!! Paging enabled!!!!\n");
-	u_char *invalid_add = (u_char *)0x2000000;
-	*invalid_add = 0xFF;
+	u_char *valid_add = (u_char *)0x2000000;
+	*valid_add = 0xFF;
+	k_printf("\n\n0x2000000 = 0x%x\n", *valid_add);
 //	k_printf("\nSwitching tasks...\n");
 //	asm("sti");
 //	asm("int $0x40");
