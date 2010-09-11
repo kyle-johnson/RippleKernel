@@ -14,32 +14,26 @@ u_char i=0;
 
 thread_struct My_Threads[1];
 
+thread_struct *__current_thread = (thread_struct *)0;
+thread_info_block *__current_tib = (thread_info_block *)0;
+
 void make_threads()
 {
-	create_thread(&My_Threads[0], 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08, 0);
-//	create_thread(&My_Threads[1], 0, (u_long)&keyboard_main, 0x08, 0x10, 0x08, 0);
-	create_thread(&My_Threads[1], 0, (u_long)&setup_keyboard, 0x08, 0x10, 0x08, 0);
-//	create_thread(&My_Threads[2], 0, (u_long)&task_2, 0x08, 0x10, 0x08, 0);
-//	create_thread(&My_Threads[3], 0, (u_long)&task_2, 0x08, 0x10, 0x08);
-//	create_thread(&My_Threads[4], 0, (u_long)&task_1, 0x08, 0x10, 0x08);
-//	create_thread(&My_Threads[1], 0, (u_long), 0x08, 0x10, 0x08);
+	thread_struct *blah;
+//	create_thread(&My_Threads[0], 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08, 0);
+	create_thread(malloc(sizeof(thread_struct)), 0, (u_long)&cool_down_thread, 0x08, 0x10, 0x08, 0);
+	blah = malloc(sizeof(thread_struct));
+	create_thread(blah, 0, (u_long)&setup_keyboard, 0x08, 0x10, 0x08, 0);
+//	create_thread(malloc(sizeof(thread_struct)), 0, (u_long)&setup_keyboard, 0x08, 0x10, 0x08, 0);
+	k_printf("Done making threads.\n");
 };
 
 void *the_scheduler(u_long esp)
 {
-//	putc('z');
-//	putc('z');
-//	putc('z');
+	__current_tib = __current_tib->ptrToNextBlock;
+	__current_thread = __current_tib->ptrToThread;
 
-	i++;
-	if(i <= 1)
-	{
-		return(My_Threads[i].esp);
-	} else
-	{
-		i=0;
-		return(My_Threads[i].esp);
-	};
+	return(__current_thread->esp);
 };
 
 void set_pit_interval(u_short interval_in_hz)
@@ -53,5 +47,5 @@ void set_pit_interval(u_short interval_in_hz)
 
 thread_struct *current_thread()
 {
-	return(&My_Threads[i]);
+	return(__current_thread);
 };

@@ -13,6 +13,13 @@ typedef struct {
 	u_long stack[255];		// stack for this thread(1024 bytes long)
 } __attribute__((packed)) thread_struct;
 
+typedef struct {
+	u_long *ptrToNextBlock;
+	u_long *ptrToPrevBlock;
+	thread_struct *ptrToThread;
+	// process_struct *ptrToProcess;
+} thread_info_block;	// circular linked list
+
 void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_long ds, u_long cs, u_long ss, u_long num_parms, ...);
 void cool_down_thread();
 
