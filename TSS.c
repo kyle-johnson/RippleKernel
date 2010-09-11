@@ -32,7 +32,7 @@ void setup_up_tsses()
 	make_descriptor(&tss_1_descriptor[1], &our_tsses[2], sizeof(our_tsses[2]), D_TSS);
 };
 
-void int_31(regs_t *regs)
+void int_31()
 {
 	k_printf("\nInterrupt 0x31\n");
 	DESCRIPTOR *tss_2_descriptor = (DESCRIPTOR *) 0x520;

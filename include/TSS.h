@@ -37,6 +37,6 @@ struct TSS {
 #pragma pack (pop) // sets us back to the way we were
 
 void setup_up_tsses();
-void int_31(regs_t *regs);
+void int_31();
 
 #endif

@@ -1,10 +1,24 @@
 [BITS 32]
 [SECTION .text]
 
+[extern _LINEAR_DATA_SEL]
+
 ;;;;;;;;;;;;;;;;;;;;; isr for IRQ1(the keyboard) ;;;;;;;;;;;;;;;;;;
 [global _kbd_isr]
-_kbd_isr:				; just "kbd_isr" in C
+_kbd_isr:	
 	cli
+	push gs
+	push fs
+	push es
+	push ds
+	pusha
+
+	mov ax, _LINEAR_DATA_SEL
+	mov ds, eax
+	mov es, eax
+	mov fs, eax
+	mov gs, eax
+
 	mov esi, pKbdRawIn		;pointer to the raw kbd buffer
 	xor eax, eax		;zero eax
 	in al, 60h			;get 1 byte from the keyboard
@@ -24,15 +38,13 @@ kbd_isr_finish:
 	mov [pKbdRawIn], eax
 	mov al, 0x20
 	out 0x20, al
-	sti
-	pop eax
 	popa				; pop GP registers
 	pop ds				; pop segment registers
 	pop es
 	pop fs
 	pop gs
-	add esp,8			; drop exception number and error code
-	iret
+	sti
+	iretd
 
 ;;;;;;;;;;;;;;;;;;;;;;;; keyboard code for retriving a byte from the raw buffer ;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -14,6 +14,7 @@
 #include <vga_utils.h>
 #include <idt.h>
 #include <exceptions.h>
+#include <cpu.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -70,6 +71,10 @@ k_main() // like main
 	modify_gate_address(&kbd_isr, 0x41);
 	k_printf("Keyboard handler installed.\n");
 
+	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
+	modify_gate_address(&irq0, 0x40);
+	k_printf("IRQ0 handler installed.\n");
+
 	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
 	paging_init();
 	k_printf("Done\n");
@@ -110,7 +115,9 @@ k_main() // like main
 
 	is_mp_present();
 
-	k_printf("switching to 320x240 with 256 colors...\n");
+	identify_cpu();
+
+	/* k_printf("switching to 320x240 with 256 colors...\n");
 
 	struct Vmode curr_vmode;
 	SetModeMODE_X(&curr_vmode);
@@ -121,7 +128,7 @@ k_main() // like main
 	for(k=0; k<300; k++)
 	{
 		_plot_pixel(k, k, curr_vmode.width, 1);
-	};
+	}; */
 
 
 
