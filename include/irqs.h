@@ -23,26 +23,27 @@
 
 //////////////////////////////////////////////////////////////////////
 
-extern _irq_watcher_1;
-extern _irq_watcher_2;
-extern _irq_watcher_3;
-extern _irq_watcher_4;
-extern _irq_watcher_5;
-extern _irq_watcher_6;
-extern _irq_watcher_7;
-extern _irq_watcher_8;
-extern _irq_watcher_9;
-extern _irq_watcher_10;
-extern _irq_watcher_11;
-extern _irq_watcher_12;
-extern _irq_watcher_13;
-extern _irq_watcher_14;
-extern _irq_watcher_15;
+extern irq_watcher_1;
+extern irq_watcher_2;
+extern irq_watcher_3;
+extern irq_watcher_4;
+extern irq_watcher_5;
+extern irq_watcher_6;
+extern irq_watcher_7;
+extern irq_watcher_8;
+extern irq_watcher_9;
+extern irq_watcher_10;
+extern irq_watcher_11;
+extern irq_watcher_12;
+extern irq_watcher_13;
+extern irq_watcher_14;
+extern irq_watcher_15;
 
 //////////////////////////////////////////////////////////////////////
 
-u_char watch_irq(u_char irq_number, u_long *key);
-void release_irq(u_char irq_number, u_long *key);
+void setup_irqs();
+u_long watch_irq(u_char irq_number, u_long key);
+void release_irq(u_char irq_number, u_long key);
 void irq_watcher_helper(u_long irq_number);
 void remap_pics(u_char pic1, u_char pic2);
 void unmask_irq(u_char irq);

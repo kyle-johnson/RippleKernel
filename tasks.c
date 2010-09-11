@@ -29,6 +29,7 @@ void kbd_input_test()
 		if(the_char != 0)
 		{
 			k_printf("0x%x\n", the_char);
+			asm("cli");asm("hlt");
 		};
 	};
 };

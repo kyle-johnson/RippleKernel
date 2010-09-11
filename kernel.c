@@ -39,13 +39,7 @@ k_main() // like main
 
 	k_clear_screen();
 
-	k_printf("Right now the kernel is loaded at 1MB physical.\n\n");
-
-	k_printf("Remapping the PIC...\n");
-	remap_pics(0x40, 0x48);	// irq 0 40h irq 8 48h
-	k_printf("PIC remapped starting at 40 hex.\n");
-
-	k_printf("\nNow setting up the exception handlers...\n");
+	k_printf("Now setting up the exception handlers...\n");
 	modify_gate_address((u_long)&isr0, 0, 1);
 	modify_gate_address((u_long)&isr1, 1, 1);
 	modify_gate_address((u_long)&isr2, 2, 1);
@@ -64,11 +58,11 @@ k_main() // like main
 	modify_gate_address((u_long)&isr16, 16, 1);
 	k_printf("Exception handlers setup.\n");
 
+	setup_irqs(); // do this before messing with ANYTHING that uses IRQs
+
 	k_printf("\nSetting up the keyboard...\n");
-	mask_irq(1);
 	setup_keyboard();
 
-	mask_irq(0);
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
 	modify_gate_address((u_long)&irq0, 0x40, 1);
 	k_printf("IRQ0 handler installed.\n");
