@@ -144,10 +144,11 @@ k_main() // like main
 	make_threads();
 
 	k_printf("\nSwitching tasks...\n");
-	unmask_irq(0);
-//	asm("jmp _task_1");
-	asm("sti");
-	asm("int $0x40");
+//	unmask_irq(0);
+//	asm("sti");
+//	asm("int $0x40");
+	cool_down_thread();
+
 /*
 	k_printf("switching to 320x240 with 256 colors...\n");
 

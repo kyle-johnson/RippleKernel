@@ -3,6 +3,7 @@
 // thread structure(thread_struct).
 ////////////////////////////////////////////////////////////////////
 #include <data_types.h>
+#include <k_defines.h>
 #include <threads.h>
 
 u_short __total_num_threads=0;
@@ -16,6 +17,7 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 	new_thread->process_id = process_id;
 	new_thread->executing = 0;
 	new_thread->sleeping = 0;
+	new_thread->first_run = 1;
 
 	// "push" 6 GP registers
 	//for(i = 0; i < 7; i++)
@@ -40,7 +42,7 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 	new_thread->stack[20] = cs;			// cs
 	new_thread->stack[21] = 0x200;			// eflags
 
-	new_thread->stack[22] = &new_thread->stack[254];	// "old" esp
+	new_thread->stack[22] = &new_thread->stack[255];	// "old" esp
 	new_thread->stack[23] = ss;			// ss
 
 	new_thread->esp = &new_thread->stack[8];
@@ -48,9 +50,12 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 
 void cool_down_thread()
 {
+	unmask_irq(0);
+	asm("sti");
+//	asm("int $0x40");
 	for(;;)
 	{
-		//asm("int $0x40");
-		asm("hlt");
+		putc('m');
+		//asm("hlt");
 	};
 };

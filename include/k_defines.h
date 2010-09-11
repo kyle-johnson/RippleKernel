@@ -32,20 +32,6 @@
 // needed for IRQ enableing
 USHORT irqs;
 
-typedef struct
-{
-	// pushed by pusha
-	unsigned edi, esi, ebp, esp, ebx, edx, ecx, eax;
-
-	// pushed separately
-	unsigned ds, es, fs, gs;
-	unsigned which_int, err_code;
-
-	// pushed by exception. Exception may also push err_code.
-	// user_esp and user_ss are pushed only if a privilege change occurs.
-	unsigned eip, cs, eflags, user_esp, user_ss;
-} regs_t;
-
 // from test.c
 void remap_pics(int pic1, int pic2);
 void unmask_irq(int irq);

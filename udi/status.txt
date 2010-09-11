@@ -1,3 +1,0 @@
-include directory - done
-common directory - done(probably)
-ripple directory - not done(based on the FreeBSD directory)
