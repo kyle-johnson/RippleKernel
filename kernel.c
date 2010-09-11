@@ -8,7 +8,6 @@
 #include <k_printf.h>
 #include <tss.h>
 #include <descriptor.h>
-#include <scheduler.h>
 #include <mp.h>
 #include <vga.h>
 #include <vga_utils.h>
@@ -18,6 +17,8 @@
 #include <processes.h>
 #include <threads.h>
 #include <tasks.h>
+#include <scheduler.h>
+#include <vbe3.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -52,22 +53,22 @@ k_main() // like main
 	k_printf("PIC remapped starting at 40 hex.\n");
 
 	k_printf("\nNow setting up the exception handlers...\n");
-	modify_gate_address(&isr0, 0);
-	modify_gate_address(&isr1, 1);
-	modify_gate_address(&isr2, 2);
-	modify_gate_address(&isr3, 3);
-	modify_gate_address(&isr4, 4);
-	modify_gate_address(&isr5, 5);
-	modify_gate_address(&isr6, 6);
-	modify_gate_address(&isr7, 7);
-	modify_gate_address(&isr8, 8);
-	modify_gate_address(&isr9, 9);
-	modify_gate_address(&isr10, 10);
-	modify_gate_address(&isr11, 11);
-	modify_gate_address(&isr12, 12);
-	modify_gate_address(&isr13, 13);
-	modify_gate_address(&isr14, 14);
-	modify_gate_address(&isr16, 16);
+	modify_gate_address((u_long)&isr0, 0);
+	modify_gate_address((u_long)&isr1, 1);
+	modify_gate_address((u_long)&isr2, 2);
+	modify_gate_address((u_long)&isr3, 3);
+	modify_gate_address((u_long)&isr4, 4);
+	modify_gate_address((u_long)&isr5, 5);
+	modify_gate_address((u_long)&isr6, 6);
+	modify_gate_address((u_long)&isr7, 7);
+	modify_gate_address((u_long)&isr8, 8);
+	modify_gate_address((u_long)&isr9, 9);
+	modify_gate_address((u_long)&isr10, 10);
+	modify_gate_address((u_long)&isr11, 11);
+	modify_gate_address((u_long)&isr12, 12);
+	modify_gate_address((u_long)&isr13, 13);
+	modify_gate_address((u_long)&isr14, 14);
+	modify_gate_address((u_long)&isr16, 16);
 	k_printf("Exception handlers setup.\n");
 
 	k_printf("\nInstalling keyboard handler...\n");
@@ -76,7 +77,7 @@ k_main() // like main
 
 	mask_irq(0);
 	k_printf("\nInstalling IRQ0 handler(task switcher)...\n");
-	modify_gate_address(&irq0, 0x40);
+	modify_gate_address((u_long)&irq0, 0x40);
 	k_printf("IRQ0 handler installed.\n");
 
 	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
@@ -121,13 +122,11 @@ k_main() // like main
 
 	identify_cpu();
 
+	FindPMEntryBlock();
 
-
-	k_printf("CS: %x", read_cs());
-
-	k_printf("\nSwitching tasks...\n");
-	asm("sti");
-	asm("int $0x40");
+//	k_printf("\nSwitching tasks...\n");
+//	asm("sti");
+//	asm("int $0x40");
 
 
 	/*k_printf("switching to 320x240 with 256 colors...\n");

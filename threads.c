@@ -5,7 +5,6 @@
 #include <data_types.h>
 #include <threads.h>
 
-thread_struct threads[1];
 u_short __total_num_threads=0;
 
 void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_long ds, u_long cs, u_long ss)
@@ -35,4 +34,14 @@ void create_thread(thread_struct *new_thread, u_short process_id, u_long eip, u_
 
 	new_thread->stack[15] = &new_thread->stack[254];			// "old" esp
 	new_thread->stack[16] = 0x8;			// ss
+
+	new_thread->esp = &new_thread->stack[0];
+};
+
+void cool_down_thread()
+{
+	for(;;)
+	{
+		asm("hlt");
+	};
 };

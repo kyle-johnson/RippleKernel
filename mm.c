@@ -248,7 +248,7 @@ void *real_mem_malloc()
 *  one 4kb page of memory that is reserved
 *  via real_mem_malloc()
 *
-*  Will return and error code if this fails, or
+*  Will return an error code if this fails, or
 *  a 0 if it succedes
 *
 * This function is based on the dealloc

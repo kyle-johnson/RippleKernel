@@ -8,6 +8,7 @@ typedef struct {
 
 	u_char pl;		// privledge level... 0 or 3
 	u_short num_threads;	// how many threads the process has... if it is not 1 or higher, the process should be nuked
+	u_char kill;		// should the process's threads be nuked? 1 = yes, 0 = no
 } process_struct;
 
 #endif
