@@ -17,15 +17,6 @@ void disable_ints()
 	asm("cli");
 };
 
-void k_printf(char *message)
-{
-	while(*message!=0)
-	{
-		putc(*message);
-		*message++;
-	};
-};
-
 k_main() // like main
 {
 	unsigned int b=0;
