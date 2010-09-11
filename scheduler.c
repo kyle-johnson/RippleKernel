@@ -11,7 +11,7 @@ u_char scheduler_mutex=0;
 thread_struct My_Thread;
 u_long new_esp;
 
-void scheduler()
+void scheduler(u_long old_esp)
 {
 	lock_mutex_block(&scheduler_mutex);
 	k_printf("\nIRQ 0\n");

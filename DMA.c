@@ -2,6 +2,7 @@
 #include <ports.h>
 #include <dma.h>
 
+// this needs work... it's been made for Real Mode
 void LoadPageAndOffset(DMA_block *blk, char *data)
 {
     unsigned int temp, segment, offset;

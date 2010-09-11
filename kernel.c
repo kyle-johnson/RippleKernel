@@ -18,7 +18,7 @@
 #include <threads.h>
 #include <tasks.h>
 #include <scheduler.h>
-#include <vbe3.h>
+#include <phys_mm.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -72,7 +72,7 @@ k_main() // like main
 	k_printf("Exception handlers setup.\n");
 
 	k_printf("\nInstalling keyboard handler...\n");
-	modify_gate_address(&kbd_isr, 0x41);
+	modify_gate_address((u_long)&kbd_isr, 0x41);
 	k_printf("Keyboard handler installed.\n");
 
 	mask_irq(0);
@@ -80,31 +80,21 @@ k_main() // like main
 	modify_gate_address((u_long)&irq0, 0x40);
 	k_printf("IRQ0 handler installed.\n");
 
-	k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
-	paging_init();
-	k_printf("Done\n");
+	// k_printf("Setting up 1 PD, 1 PDE, and 1024 4k pages\n");
+	// paging_init();
+	// k_printf("Done\n");
 
-	k_printf("Turning on paging...\n");
-	enable_paging();
-	k_printf("Paging enabled!\n");
-
-	k_printf("\nNow trying to malloc one 4kb page of memory...\n");
-	a = (u_short*)real_mem_malloc();
-	if(a!=-1)
-	{
-		k_printf("Got it!\n\n");
-		k_printf("Now trying to free the memory...\n");
-		real_mem_free(a);
-		k_printf("Memory is free!\n\n");
-	};
+	// k_printf("Turning on paging...\n");
+	// enable_paging();
+	// k_printf("Paging enabled!\n\n");
 
 //	k_printf("Setting up the real time clock handler..\n");
 
 //	outportb(0x70, 0x0A);
 //	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
 
-	k_printf("Now attempting to find floppy drives...\n");
-	inti_floppy();
+//	k_printf("Now attempting to find floppy drives...\n");
+//	inti_floppy();
 
 //	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
 
@@ -118,16 +108,28 @@ k_main() // like main
 //	};
 
 
-	is_mp_present();
+//	is_mp_present();
 
-	identify_cpu();
+//	identify_cpu();
 
-	FindPMEntryBlock();
+	k_printf("\n%x\n", setup_phys_mm_stack(0x200000));
+	u_long *phys_page_stack = (u_long *)0x200000;
+	for(temp2 = 0x300000; temp2 < 0xB00000; temp2 += 4096)
+	{
+		push_phys_mm(0x200000, temp2);
+	};
 
+	k_printf("Pages pushed onto the stack for the first 16MB of memory.\n");
+	write_cr3(virt_mem_inti());
+	k_printf("First page directory and page table setup...\nCR3 loaded with the page directory's address.\n");
+	k_printf("Hold your breath, enabling paging...\n");
+	enable_paging();
+	k_printf("YEAH!!! Paging enabled!!!!\n");
+	u_char *invalid_add = (u_char *)0x2000000;
+	*invalid_add = 0xFF;
 //	k_printf("\nSwitching tasks...\n");
 //	asm("sti");
 //	asm("int $0x40");
-
 
 	/*k_printf("switching to 320x240 with 256 colors...\n");
 

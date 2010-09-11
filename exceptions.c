@@ -4,17 +4,22 @@
 
 void fault(u_char int_num)
 {
-	if(int_num == 0x0E) // page fault
-	{
-		k_printf("PAGE FAULT!!!!!!!!!");
-	}
-	else
-	{
+	u_long fault_address;
+	asm("pushl %eax");
+	asm("movl %cr2, %eax");
+	asm("movl %%eax, %w0" : "=m" (fault_address));
+	asm("popl %eax");
+	//if(int_num == 0x0E) // page fault
+	//{
+		k_printf("PAGE FAULT! 0x%x\n", fault_address);
+	//}
+	//else
+	//{
 		k_printf("%d", int_num);
 		panic("System fault...  You need to restart your computer.");
 		asm("cli");
 		asm("hlt");
-	};
+	//};
 	outportb(0x20, 0x20);
 };
 
