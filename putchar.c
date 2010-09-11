@@ -3,6 +3,7 @@
 #include <k_defines.h>
 #include <putchar.h>
 #include <data_types.h>
+#include <string.h>
 
 // video memory pointer
 char *vidmem2 = (char *) 0xb8000;

@@ -1,6 +1,7 @@
-// memset, memcpy, etc
-// (I have permission from Frank to use these now)
+// memset, memcpy, strlen, etc
+// from Frank Millea's string.c
 #include <data_types.h>
+#include <string.h>
 
 void _memsetb(void *dest, u_char c, u_long n)
 {
@@ -75,6 +76,11 @@ u_long _strlen(u_char *s)
 		i++;
 	};
 	return i;
+};
+
+void _strcat(u_char *dst, u_char *src)
+{
+	_memcpy(&dst[_strlen(dst)], src, _strlen(src) + 1);
 };
 
 u_char _strcmp(u_char *s1, u_char *s2)

@@ -71,7 +71,6 @@ void fault(regs_t *regs);
 unsigned int panic(char *message);
 
 void k_clear_screen();
-void k_printf(char *message);
 void update_cursor(int row, int col);
 unsigned int k_load();
 

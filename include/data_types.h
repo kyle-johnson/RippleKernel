@@ -1,3 +1,5 @@
+#ifndef DATA_TYPES_HEADER
+#define DATA_TYPES_HEADER
 // typedeffs for u_long, u_short, etc
 
 // define NULL if compiler hasn't
@@ -23,3 +25,5 @@ typedef unsigned short u_short;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
 typedef unsigned long long u_huge;
+
+#endif

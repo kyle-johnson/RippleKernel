@@ -1,6 +1,8 @@
 #ifndef FLOPPY_HEADER
 #define FLOPPY_HEADER
 
+unsigned char irq6_fired;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////// from Frank's floppy.h
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,11 +91,17 @@ typedef struct
 #define FLOPPY_E_UNKNOWN_ERROR	(-1000+13)
 #define FLOPPY_E_DISK_CHANGED	(-1000+14)
 #define FLOPPY_E_UNKNOWN_FORMAT	(-1000+15)
+
+unsigned char floppy_num_command_bytes[] = {0, 0, 9, 3, 2, 9, 9, 2, 1, 9, 2, 0, 9, 6, 0, 3};
+unsigned char floppy_num_status_bytes[] =  {0, 0, 7, 0, 1, 7, 7, 0, 2, 7, 7, 0, 7, 7, 0, 0};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void inti_floppy();
-void enable_floppy_a();
-void stop_floppy_a_motor();
+void start_floppy_motor(unsigned char drive, unsigned char wait);
+void stop_floppy_motor(unsigned char drive);
+unsigned char calibrate_floppy(unsigned char drive);
+int send_floppy_command(unsigned char drive, unsigned char *command_bytes, unsigned char *status_bytes);
+void int6(regs_t *regs);
 void reset_fdc();
 unsigned char is_fdc_ready();
 unsigned char disk_changed();

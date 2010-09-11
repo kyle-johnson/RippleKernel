@@ -4,6 +4,7 @@
 #include <data_types.h>
 #include <floppy.h>
 #include <real_time_clock.h>
+#include <k_printf.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -23,6 +24,7 @@ k_main() // like main
 {
 	unsigned int b=0;
 	unsigned int * a;
+	unsigned long temp2;
 	vector_t v, soft, real_clock_vector; // needed for keyboard ISR and int 30 ISR
 	amount_of_ticks=0;
 	unsigned char temp;
@@ -99,21 +101,21 @@ k_main() // like main
 	k_printf("Real time clock handler has been set up and IRQ 8 has been unmasked..\n\n");
 
 	outportb(0x70, 0x0A);
-	outportb(0x71, (inportb(0x71) | 0x0F)); // set the real time clock to generate 2 ints per second
+	outportb(0x71, (inportb(0x71) | 0x06)); // set the real time clock to generate 1024 ints per second
 
 	k_printf("The real time clock will now be enabled for 6 seconds, then disabled...\n");
+
+	temp2 = amount_of_ticks + (6*1024);
 	enable_rtc();
-	k_printf("test....\n");
-	while(amount_of_ticks < 12)
-	{
-		;
-	};
+	while(amount_of_ticks < temp2);
+	// sleep(6*1024);
+
 	mask_irq(8);
 	disable_rtc();
-	k_printf("6 seconds have passed and the real time clock has been disabled.\n\n");
+	k_printf("%d seconds have passed and the real time %s has been %s.\n", 6, "clock", "disabled");
 
-	k_printf("Now attempting to find floppy drives...\n");
-	inti_floppy();
+	// k_printf("Now attempting to find floppy drives...\n");
+	// inti_floppy();
 
 	while(b!=5)		// the 'idle' loop
 	{;};

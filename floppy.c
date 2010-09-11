@@ -71,18 +71,25 @@ void inti_floppy()
 
 unsigned char calibrate_floppy(unsigned char drive)
 {
+	unsigned char calibrate_command[] = {FLOPPY_CALIBRATE_DRIVE, drive};
+
 	if(floppy_drives[drive].motor_on != 1)
 	{
-		start_floppy_motor(drive);
+		start_floppy_motor(drive, 1);
 	};
+
+	return send_floppy_command(drive, calibrate_command, NULL);
 };
 
-void start_floppy_motor(unsigned char drive)
+void start_floppy_motor(unsigned char drive, unsigned char wait)
 {
 	if(floppy_drives[drive].motor_on != 1)
 	{
 		outportb(0x03F2, 0x0C | drive | <1 << (4 + drive)));
-		sleep(500); // wait for the motor to spin up
+		if(wait == 1)
+		{
+			sleep(500); // wait for the motor to spin up
+		};
 		floppy_drives[drive].motor_on = 1;
 	};
 };
@@ -119,6 +126,43 @@ unsigned char is_fdc_ready()
 	return 0;
 };
 
+// used to send commands to the FDC(from Frank's floppy.c with a very few small modifications for easier reading by me)
+int send_floppy_command(unsigned char drive, unsigned char *command_bytes, unsigned char *status_bytes)
+{
+	int i;
+	unsigned long time;
+	unsigned char opcode = command_bytes[0] & 0x1F;
+
+	irq6_fired = 0;
+
+	for(i=0; i<floppy_num_command_bytes[opcode]; i++)
+	{
+		while(is_fdc_ready != 1); // wait until the FDC is ready
+		outportb(FLOPPY_DATA, command_bytes[i]);
+	};
+
+	if(opcode != FLOPPY_CHECK_INT_STATUS && opcode != FLOPPY_SPECIFY)
+	{
+		time = amount_of_ticks + 2048;
+		while(irq6_fired != 1)
+		{
+			if(amout_of_ticks == time)
+			{
+				k_printf("send_floppy_command() - IRQ6 has timed out(2 seconds).\n");
+				return FLOPPY_E_NO_IRQ6;
+			};
+		};
+	};
+
+	for(i=0; i<floppy_num_status_bytes[opcode]; i++)
+	{
+		while(is_fdc_ready != 1); // wait until the FDC is ready
+		status_bytes[i] = inportb(FLOPPY_DATA);
+	};
+
+	return 0;
+};
+
 // returns 1 if the disk has been changed since the last command
 // or 0 if it hasn't
 unsigned char disk_changed()
@@ -137,4 +181,10 @@ unsigned char disk_changed()
 	};
 
 	return 0;
+};
+
+// int 0x6 is used by the FDC to tell us whether or not a command was completed
+void int6(regs_t *regs)
+{
+	int6_fired = 1;
 };
