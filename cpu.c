@@ -37,5 +37,5 @@ u_char identify_cpu()
 	asm("popl %eax");
 
 	k_printf("\nVendor string: %s\n", vender_string);
-	k_printf("Maximum EAX value: %x %x\n", first_eax[0], first_eax[1]);
+	k_printf("Maximum EAX value: %x %x\n", first_eax[1], first_eax[0]);
 };

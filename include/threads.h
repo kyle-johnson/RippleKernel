@@ -9,6 +9,7 @@ typedef struct {
 	u_char thread_mutex;	// the mutex of the process that owns the thread overrides the thread's mutex if the process mutex is locked
 	u_char sleeping;		// 0 = no, 1 = yes
 	u_long sleep_ticks;	// the process can't sleep for more than 4,194,303 seconds... should be plenty :)
+	u_char stack[1023];	// stack for this thread(1024 bytes long)
 } thread_struct;
 
 #endif

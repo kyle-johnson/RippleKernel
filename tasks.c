@@ -5,11 +5,10 @@
 
 task_1()
 {
-	struct TSS *our_tsses = (struct TSS *) 0x200000;
-	putc('a');
-	putc('a');
-	our_tsses[1].link = 6;
-	putc('a');
+	for(;;)
+	{
+		putc('a');
+	};
 };
 
 task_2()
