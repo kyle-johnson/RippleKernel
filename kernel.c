@@ -50,6 +50,12 @@ k_main() // like main
 	v.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
 	setvect(&v, 0x41);		// okay, DO IT!
 
+	k_printf("Setting up IRQ 6(floppy...\n");
+	v.eip = (unsigned)irq6;
+	v.access_byte = 0x8E;	// present, ring 0, 386 interrupt gate
+	setvect(&v, 0x46);
+	unmask_irq(6);
+
 	k_printf("Changing interrupt vector for int 30(software interrupt)\n");
 	soft.eip = (unsigned)int30;
 	soft.access_byte = 0x8E;	// present, ring 0, '386 interrupt gate
@@ -105,20 +111,32 @@ k_main() // like main
 
 	k_printf("The real time clock will now be enabled for 6 seconds, then disabled...\n");
 
-	temp2 = amount_of_ticks + (6*1024);
 	enable_rtc();
-	while(amount_of_ticks < temp2);
-	// sleep(6*1024);
+	sleep(6*1024);
 
 	mask_irq(8);
 	disable_rtc();
-	k_printf("%d seconds have passed and the real time %s has been %s.\n", 6, "clock", "disabled");
+	k_printf("%c seconds have passed and the real time %s has been %s.\n\n", '6', "clock", "disabled");
 
-	// k_printf("Now attempting to find floppy drives...\n");
-	// inti_floppy();
+	k_printf("Now attempting to find floppy drives...\n");
+	inti_floppy();
+
+	unmask_irq(8);
+	enable_rtc(); // must renable the rtc since we just disabled it and will be using the sleep function
+
+	if(calibrate_floppy(0) == 0)
+	{
+		k_printf("The first floppy drive has been calibrated!!!\n");
+	}
+	else
+	{
+		k_printf("The first floppy drive hasn't been calibrated :( \n");
+	};
 
 	while(b!=5)		// the 'idle' loop
-	{;};
+	{
+		asm("hlt");
+	};
 };
 
 void k_clear_screen() // clear the entire text screen

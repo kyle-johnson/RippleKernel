@@ -1,12 +1,34 @@
+/***************************************************************
+  Most of the information for these functions came from
+  Frank Millea's floppy.c file. Most of these functions he
+  wrote, and I have just done a tad here 'n' there to make
+  them more readable for me.
+***************************************************************/
 #include <k_defines.h>
+#include <data_types.h>
+#include <real_time_clock.h>
 #include <floppy.h>
 
 floppy_drive_t floppy_drives[1];
+
+unsigned char floppy_num_command_bytes[] = {0, 0, 9, 3, 2, 9, 9, 2, 1, 9, 2, 0, 9, 6, 0, 3};
+unsigned char floppy_num_status_bytes[] =  {0, 0, 7, 0, 1, 7, 7, 0, 2, 7, 7, 0, 7, 7, 0, 0};
+char *floppy_errors[] =
+{
+	"Unit check", "Not ready", "End of cylinder", "Data error",
+	"Timeout", "No data", "Write protect", "No address mark",
+	"CRC error", "Wrong cylinder", "Seek error", "Bad cylinder",
+	"No IRQ6", "Unknown error", "Disk changed"
+};
 
 void inti_floppy()
 {
 	int i;
 	unsigned char c, a, b;
+
+	// these are the internal names... they can change, since it really doesn't matter what the floppy drives are called :)
+	floppy_drives[0].name = "fda";
+	floppy_drives[1].name = "fdb";
 
 	outportb(0x70, 0x10);	// select floppy drive type byte in CMOS
 	c = inportb(0x71);
@@ -19,6 +41,9 @@ void inti_floppy()
 
 	a = c >> 4;
 	b = c & 0x0F;
+
+	floppy_drives[0].type = a;
+	floppy_drives[1].type = b;
 
 	switch(a) {
 		case 0x04:
@@ -67,6 +92,24 @@ void inti_floppy()
 			k_printf("Unknown B floppy drive type.\n");
 			break;
 	};
+
+	if(floppy_drives[0].type != 1 && floppy_drives[0].type != 2) // most common
+	{
+		floppy_drives[0].gap3 = 27;
+	}
+	else
+	{
+		floppy_drives[0].gap3 = 42;
+	};
+	if(floppy_drives[1].type != 1 && floppy_drives[1].type != 2) // most common
+	{
+		floppy_drives[1].gap3 = 27;
+	}
+	else
+	{
+		floppy_drives[1].gap3 = 42;
+	};
+
 };
 
 unsigned char calibrate_floppy(unsigned char drive)
@@ -78,6 +121,7 @@ unsigned char calibrate_floppy(unsigned char drive)
 		start_floppy_motor(drive, 1);
 	};
 
+	k_printf("Sending calibrate command to floppy drive %d.\n", drive);
 	return send_floppy_command(drive, calibrate_command, NULL);
 };
 
@@ -85,12 +129,16 @@ void start_floppy_motor(unsigned char drive, unsigned char wait)
 {
 	if(floppy_drives[drive].motor_on != 1)
 	{
-		outportb(0x03F2, 0x0C | drive | <1 << (4 + drive)));
+		outportb(0x03F2, 0x0C | drive | (1 << (4 + drive)));
+
+		k_printf("Waiting for floppy drive %d to spin up...\n", drive);
 		if(wait == 1)
 		{
 			sleep(500); // wait for the motor to spin up
 		};
 		floppy_drives[drive].motor_on = 1;
+
+		k_printf("Motor for floppy drive %d is on.\n", drive);
 	};
 };
 
@@ -113,8 +161,8 @@ unsigned char is_fdc_ready()
 	unsigned char c;
 
 	c = inportb(0x03F4);
-	c = c & 0xC0;
-	if(c == 0x80)
+	c = c & 0x80;
+	if(c != 0)
 	{
 		return 1;
 	}
@@ -137,7 +185,8 @@ int send_floppy_command(unsigned char drive, unsigned char *command_bytes, unsig
 
 	for(i=0; i<floppy_num_command_bytes[opcode]; i++)
 	{
-		while(is_fdc_ready != 1); // wait until the FDC is ready
+		while(is_fdc_ready() != 1); // wait until the FDC is ready
+		k_printf("The FDC is now ready and the actual command bytes are being sent to the FDC.\n");
 		outportb(FLOPPY_DATA, command_bytes[i]);
 	};
 
@@ -146,7 +195,7 @@ int send_floppy_command(unsigned char drive, unsigned char *command_bytes, unsig
 		time = amount_of_ticks + 2048;
 		while(irq6_fired != 1)
 		{
-			if(amout_of_ticks == time)
+			if(amount_of_ticks == time)
 			{
 				k_printf("send_floppy_command() - IRQ6 has timed out(2 seconds).\n");
 				return FLOPPY_E_NO_IRQ6;
@@ -163,8 +212,7 @@ int send_floppy_command(unsigned char drive, unsigned char *command_bytes, unsig
 	return 0;
 };
 
-// returns 1 if the disk has been changed since the last command
-// or 0 if it hasn't
+// THIS FUNCTION NEEDS TO BE COMPLETED
 unsigned char disk_changed()
 {
 	unsigned char c;
@@ -184,7 +232,7 @@ unsigned char disk_changed()
 };
 
 // int 0x6 is used by the FDC to tell us whether or not a command was completed
-void int6(regs_t *regs)
+void irq6(regs_t *regs)
 {
-	int6_fired = 1;
+	irq6_fired = 1;
 };

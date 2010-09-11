@@ -30,8 +30,5 @@ inline void sleep(unsigned int ticks)
 	unsigned long end_ticks;
 
 	end_ticks = amount_of_ticks + ticks;
-	while(amount_of_ticks < end_ticks)
-	{
-		k_printf("tick\n");
-	};
+	while(amount_of_ticks < end_ticks);
 };

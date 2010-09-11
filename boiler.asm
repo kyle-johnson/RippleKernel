@@ -3,7 +3,11 @@
 
 %define UNDERBARS
 %include "asm.inc"
+%include "gdtnasm.inc"
 PAGE_BIT equ 0x80000000
+
+[extern _task_1]
+[extern _task_2]
 
 [SECTION .text]
 [BITS 32]
@@ -322,10 +326,109 @@ EXP setvect
 %assign i (i + 1)
 %endrep
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [SECTION .data]
-ds_magic:		;this is so we know if our data segment was linked properly
+ds_magic:		;this is so we know if our data segment was linked corectly
 	dd DS_MAGIC	; ^
+
+[global _tss0_begin]
+TSS0_START	equ	$+1
+_tss0_begin:		;empty, this is just so that we can "get the ball rolling"
+	dw 0		; back link
+	dd 0		; esp0
+	dw 0		; ss0
+	dd 0		; esp1
+	dw 0		; ss1
+	dd 0		; esp2
+	dw 0		; ss2
+	dd 0		; cr3
+	dd 0		; eip
+	dd 0		; eflags
+	dd 0		; eax
+	dd 0		; ecx
+	dd 0		; edx
+	dd 0		; ebx
+	dd 0		; esp
+	dd 0		; ebp
+	dd 0		; esi
+	dd 0		; edi
+	dw 0		; es
+	dw 0		; cs
+	dw 0		; ss
+	dw 0		; ds
+	dw 0		; fs
+	dw 0		; gs
+	dw 0		; ldt
+	dw 0		; trace/trap
+	dw 0		; i/o bitmap address
+
+[global _tss1_begin]
+TSS1_START	equ	$+1
+_tss1_begin:
+	dw 0			; back link
+	dd 0			; esp0
+	dw 0			; ss0
+	dd 0			; esp1
+	dw 0			; ss1
+	dd 0			; esp2
+	dw 0			; ss2
+	dd 0x9C000		; cr3
+	dd _task_1		; eip
+	dd 0			; eflags
+	dd 0			; eax
+	dd 0			; ecx
+	dd 0			; edx
+	dd 0			; ebx
+	dd stack			; esp
+	dd 0			; ebp
+	dd 0			; esi
+	dd 0			; edi
+	dw 0			; es
+	dw LINEAR_CODE_SEL	; cs
+	dw LINEAR_DATA_SEL	; ss
+	dw 0			; ds
+	dw 0			; fs
+	dw 0			; gs
+	dw 0			; ldt
+	dw 0			; trace/trap
+	dw 0			; i/o bitmap address
+
+[global _tss2_begin]
+TSS2_START	equ	$+1
+_tss2_begin:
+	dw 0			; back link
+	dd 0			; esp0
+	dw 0			; ss0
+	dd 0			; esp1
+	dw 0			; ss1
+	dd 0			; esp2
+	dw 0			; ss2
+	dd 0x9C000		; cr3
+	dd _task_2		; eip
+	dd 0			; eflags
+	dd 0			; eax
+	dd 0			; ecx
+	dd 0			; edx
+	dd 0			; ebx
+	dd stack			; esp
+	dd 0			; ebp
+	dd 0			; esi
+	dd 0			; edi
+	dw 0			; es
+	dw LINEAR_CODE_SEL	; cs
+	dw LINEAR_DATA_SEL	; ss
+	dw 0			; ds
+	dw 0			; fs
+	dw 0			; gs
+	dw 0			; ldt
+	dw 0			; trace/trap
+	dw 0			; i/o bitmap address
+tss2_end:
+
+
+TSS_SIZE	equ	(tss2_end - _tss2_begin)
 
 gdt:			;our descriptors
 ; NULL descriptor
@@ -359,6 +462,15 @@ LINEAR_CODE_SEL	equ	$-gdt
 	db 9Ah		; present,ring 0,code,non-conforming,readable
 	db 0CFh		; page-granular (4 gig limit), 32-bit
 	db 0
+;TSS_ENTRY_0		equ	$-gdt
+;	desc TSS0_START, TSS_SIZE, D_TSS	
+
+;TSS_ENTRY_1		equ	$-gdt
+;	desc TSS1_START, TSS_SIZE, D_TSS
+
+;TSS_ENTRY_2		equ	$-gdt
+;	desc TSS2_START, TSS_SIZE, D_TSS
+
 gdt_end:
 
 gdt_ptr:

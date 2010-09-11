@@ -35,3 +35,10 @@ _write_cr3:
 	mov cr3, eax
 	pop ebp
 	retn
+
+[global _read_cr2]
+_read_cr2:
+	mov eax, cr2
+	mov edx, eax
+	shr edx, 16	; the return value is CR2
+	retn

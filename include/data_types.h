@@ -9,9 +9,6 @@
 
 typedef unsigned size_t;
 
-// va_list data type... (eventually will be)used by printf
-typedef unsigned char *va_list;
-
 // signed data types
 typedef signed char s_char;
 typedef signed short s_short;
