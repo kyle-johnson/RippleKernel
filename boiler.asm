@@ -336,38 +336,7 @@ EXP setvect
 ds_magic:		;this is so we know if our data segment was linked corectly
 	dd DS_MAGIC	; ^
 
-tss2_begin:
-	dw 0			; back link
-	dd 0			; esp0
-	dw 0			; ss0
-	dd 0			; esp1
-	dw 0			; ss1
-	dd 0			; esp2
-	dw 0			; ss2
-	dd 0x9C000		; cr3
-	dd _task_2		; eip
-	dd 0			; eflags
-	dd 0			; eax
-	dd 0			; ecx
-	dd 0			; edx
-	dd 0			; ebx
-	dd _stack			; esp
-	dd 0			; ebp
-	dd 0			; esi
-	dd 0			; edi
-	dw 0			; es
-	dw _LINEAR_CODE_SEL	; cs
-	dw _LINEAR_DATA_SEL	; ss
-	dw 0			; ds
-	dw 0			; fs
-	dw 0			; gs
-	dw 0			; ldt
-	dw 0			; trace/trap
-	dw 0			; i/o bitmap address
-tss2_end:
-
-
-TSS_SIZE	equ	(tss2_end - tss2_begin)
+TSS_SIZE	equ	108
 
 gdt:			;our descriptors
 ; NULL descriptor

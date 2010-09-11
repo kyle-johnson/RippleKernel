@@ -27,6 +27,7 @@ void k_printf(char *message, ...)
 				tmp = _strlen(total_message);
 				total_message[tmp] = message[i];
 				total_message[tmp +1] = '\0';
+				is_percent_sign = 0;
 			};
 		}
 		else if(is_percent_sign != 1)

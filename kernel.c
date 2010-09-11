@@ -5,6 +5,7 @@
 #include <floppy.h>
 #include <real_time_clock.h>
 #include <k_printf.h>
+#include <tss.h>
 
 // video memory pointer
 char *vidmem = (char *) 0xb8000;
@@ -112,7 +113,7 @@ k_main() // like main
 	k_printf("The real time clock will now be enabled for 6 seconds, then disabled...\n");
 
 	enable_rtc();
-	sleep(6*1024);
+//	sleep(6*1024);
 
 	mask_irq(8);
 	disable_rtc();
@@ -137,7 +138,7 @@ k_main() // like main
 	get_time_str(0, &hours, &minutes, &seconds);
 	k_printf("%s:%s:%s", hours, minutes, seconds);
 
-	k_printf("\ndo you see a percent sign below this line?\n%%");
+	k_printf("\ndo you see a percent sign below this line?\n%%\n");
 
 	setup_up_tsses();
 	load_first_ltr();
